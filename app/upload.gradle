@@ -1,0 +1,135 @@
+apply plugin: 'com.android.application'
+apply plugin: 'maven'
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.android.tools.build:gradle:1.2.0'
+
+		// NOTE: Do not place your application dependencies here; they belong
+		// in the individual module build.gradle files
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+android {
+	compileSdkVersion 22
+	buildToolsVersion "23.0.0 rc3"
+
+	lintOptions {
+		abortOnError false
+	}
+}
+
+dependencies {
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+
+
+/** 以下部分结合build创建jar包 */
+
+// 清除上次编译过的jar包
+task clearJar(type: Delete) {
+	delete 'libs/SgFrameUtils.jar'
+}
+
+
+// 打包jar
+task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
+	// 指定jar名称
+	baseName 'SgFrameUtils'
+	// 选择打包class的文件
+	from ('build/intermediates/classes/debug/')
+	/*
+	{
+		// 指定包含的文件或文件夹
+		include 'utils'
+	}
+	 */
+	// 打包的jar的目录结构
+	into ('/')
+	// 去掉不需要打包的目录和文件
+	exclude('com/jackiezhuang/sgframework/BuildConfig.class', 'com/jackiezhuang/sgframework/R.class')
+	// 去掉R$开头的文件
+	exclude{ it.name.startsWith('R$'); }
+}
+
+// 依赖android的build和clearJar
+makeJar.dependsOn(clearJar)
+
+apply plugin: 'signing'
+
+// 增加分支，指定上传文件
+artifacts {
+	archives file("build/libs/SgFrameUtils.jar")
+}
+
+signing {
+	required { gradle.taskGraph.hasTask("uploadArchives") }
+	sign makeJar
+}
+
+
+uploadArchives {
+	configuration = configurations.archives
+	repositories {
+		mavenDeployer {
+			// 上传前签名
+			beforeDeployment {
+				MavenDeployment deployment -> signing.signPom(deployment)
+			}
+			repository(url: "http://127.0.0.1:8081/nexus/content/repositories/releases/") {
+				authentication(userName:'deployment', password:'deployment')
+			}
+
+			/*
+			pom('SgFrameUtils').project {
+				name project.name
+				groupId 'com.jackiezhuang.sgframework'
+				artifactId 'SgFrameUtils'
+				version '1.1'
+				packaging 'jar'
+			}
+			*/
+			// 使用过滤防止上传其他类型包
+			addFilter('SgFrameUtils') {
+                artifact, file -> artifact.name == 'SgFrameUtils'
+            }
+			pom('SgFrameUtils').setName(project.name)
+			pom('SgFrameUtils').setGroupId('com.jackiezhuang.sgframework')
+			pom('SgFrameUtils').setArtifactId('SgFrameUtils')
+			pom('SgFrameUtils').setVersion('1.2')
+			pom('SgFrameUtils').setPackaging('jar')
+		}
+	}
+}
+
+uploadArchives.dependsOn makeJar
+
+
+// 另一种打包上传方式
+
+apply plugin:'maven-publish'
+
+//makeJar.dependsOn(build)
+publishing {
+	repositories {
+		maven {
+			url "http://127.0.0.1:8081/nexus/content/repositories/releases/"
+		}
+	}
+	publications {
+		maven(MavenPublication) {
+			groupId 'com.jackiezhuang.sgframework'
+			artifactId 'SgFrameUtils'
+			version '1.1'
+			artifact makeJar
+		}
+	}
+}
