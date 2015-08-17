@@ -1,7 +1,5 @@
 package com.jackiezhuang.sgframework.utils;
 
-import android.os.Build;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -23,7 +21,8 @@ public class HttpUtil {
 	public static final int READ_TIMEOUT = 30 * 1000;
 
 	public static void post(String requestUrl, Map<String, String> params) throws IOException {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD_MR1) {
+		// 10 Build.VERSION_CODES.GINGERBREAD_MR1
+		if (SystemTool.getSDKVersion() < 10) {
 			// 使用HttpClient 进行Post操作
 		} else {
 			// 使用Url
