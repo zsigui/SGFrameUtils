@@ -9,6 +9,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
+ * MD5摘要算法类
+ *
  * Created by zsigui on 15-8-17.
  */
 public class MD5 {

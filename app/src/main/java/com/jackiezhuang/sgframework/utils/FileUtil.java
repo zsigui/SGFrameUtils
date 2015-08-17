@@ -28,20 +28,20 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 /**
- * æ–‡ä»¶æ“ä½œå·¥å…·ç±»
+ * ÎÄ¼ş²Ù×÷¹¤¾ßÀà
  * <p/>
  * Created by zsigui on 15-8-17.
  */
 public class FileUtil {
 
 	private static final String PRE_TAG = FileUtil.class.toString();
-	// å®šä¹‰3MBä¸ºå¤§å°æ–‡ä»¶åˆ†éš”
+	// ¶¨Òå3MBÎª´óĞ¡ÎÄ¼ş·Ö¸ô
 	private static final int BIG_FILE_COUNT = 3 * 1024 * 1024;
 	public static final String DEFAULT_CHARSET = Charset.defaultCharset().displayName();
 
 
 	/**
-	 * å…³é—­IOæµ
+	 * ¹Ø±ÕIOÁ÷
 	 *
 	 * @param closeables
 	 */
@@ -62,9 +62,9 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æŒ‡å®šè¾“å…¥æµä¸­è¯»å–å­—èŠ‚æ•°ç»„
+	 * ´ÓÖ¸¶¨ÊäÈëÁ÷ÖĞ¶ÁÈ¡×Ö½ÚÊı×é
 	 *
-	 * @param in è¾“å…¥æµå®ä¾‹
+	 * @param in ÊäÈëÁ÷ÊµÀı
 	 * @return
 	 */
 	public static byte[] readBytes(InputStream in) {
@@ -76,7 +76,7 @@ public class FileUtil {
 		byte[] result = null;
 		if (in instanceof FileInputStream) {
 
-			// ä½¿ç”¨NIOæ–¹å¼è¯»å–
+			// Ê¹ÓÃNIO·½Ê½¶ÁÈ¡
 			FileChannel fc = ((FileInputStream) in).getChannel();
 			try {
 				ByteBuffer buffer = ByteBuffer.allocate((int) fc.size());
@@ -92,7 +92,7 @@ public class FileUtil {
 			}
 		} else {
 
-			// ä½¿ç”¨æ™®é€šIOæµè¯»å–
+			// Ê¹ÓÃÆÕÍ¨IOÁ÷¶ÁÈ¡
 			BufferedInputStream bis = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new
 					BufferedInputStream(in);
 			try {
@@ -116,7 +116,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»å¤§æ–‡ä»¶ä¸­è¯»å–æ•°æ®å­˜æ”¾åˆ°å­—èŠ‚æ•°ç»„ä¸­
+	 * ´Ó´óÎÄ¼şÖĞ¶ÁÈ¡Êı¾İ´æ·Åµ½×Ö½ÚÊı×éÖĞ
 	 *
 	 * @param file
 	 * @return
@@ -137,7 +137,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»å¤§æ–‡ä»¶ä¸­è¯»å–æ•°æ®å­˜æ”¾åˆ°å­—èŠ‚æ•°ç»„ä¸­
+	 * ´Ó´óÎÄ¼şÖĞ¶ÁÈ¡Êı¾İ´æ·Åµ½×Ö½ÚÊı×éÖĞ
 	 *
 	 * @param filePath
 	 * @return
@@ -147,7 +147,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æ–‡ä»¶ä¸­è¯»å–æ•°æ®å­˜æ”¾åˆ°å­—èŠ‚æ•°ç»„ä¸­
+	 * ´ÓÎÄ¼şÖĞ¶ÁÈ¡Êı¾İ´æ·Åµ½×Ö½ÚÊı×éÖĞ
 	 *
 	 * @param filePath
 	 * @return
@@ -160,7 +160,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æ–‡ä»¶ä¸­è¯»å–æ•°æ®å­˜æ”¾åˆ°å­—èŠ‚æ•°ç»„ä¸­
+	 * ´ÓÎÄ¼şÖĞ¶ÁÈ¡Êı¾İ´æ·Åµ½×Ö½ÚÊı×éÖĞ
 	 *
 	 * @param file
 	 * @return
@@ -172,7 +172,7 @@ public class FileUtil {
 			fin = new FileInputStream(file);
 			int size = fin.available();
 			if (size > BIG_FILE_COUNT && size < Integer.MAX_VALUE) {
-				// æ‰§è¡Œå¤§æ–‡ä»¶è¯»å†™
+				// Ö´ĞĞ´óÎÄ¼ş¶ÁĞ´
 				result = readBytesFromBigFile(file);
 			} else {
 				result = readBytes(fin);
@@ -186,7 +186,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æ–‡ä»¶ä¸­è¯»å–æŒ‡å®šç¼–ç æ ¼å¼çš„æ–‡æœ¬å­—ç¬¦ä¸²
+	 * ´ÓÎÄ¼şÖĞ¶ÁÈ¡Ö¸¶¨±àÂë¸ñÊ½µÄÎÄ±¾×Ö·û´®
 	 *
 	 * @param filePath
 	 * @param charset
@@ -197,7 +197,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æ–‡ä»¶ä¸­è¯»å–æŒ‡å®šç¼–ç æ ¼å¼çš„æ–‡æœ¬å­—ç¬¦ä¸²
+	 * ´ÓÎÄ¼şÖĞ¶ÁÈ¡Ö¸¶¨±àÂë¸ñÊ½µÄÎÄ±¾×Ö·û´®
 	 *
 	 * @param file
 	 * @param charset
@@ -214,7 +214,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æ–‡ä»¶ä¸­è¯»å–ç³»ç»Ÿé»˜è®¤ç¼–ç æ ¼å¼çš„æ–‡æœ¬å­—ç¬¦ä¸²
+	 * ´ÓÎÄ¼şÖĞ¶ÁÈ¡ÏµÍ³Ä¬ÈÏ±àÂë¸ñÊ½µÄÎÄ±¾×Ö·û´®
 	 *
 	 * @param filePath
 	 * @return
@@ -224,7 +224,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * ä»æ–‡ä»¶ä¸­è¯»å–æŒ‡å®šç¼–ç æ ¼å¼çš„æ–‡æœ¬å­—ç¬¦ä¸²
+	 * ´ÓÎÄ¼şÖĞ¶ÁÈ¡Ö¸¶¨±àÂë¸ñÊ½µÄÎÄ±¾×Ö·û´®
 	 *
 	 * @param file
 	 * @return
@@ -234,7 +234,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥å­—èŠ‚æ•°ç»„æ•°æ®åˆ°æŒ‡å®šè¾“å‡ºæµä¸­(è¯¥æ–¹æ³•ä¼šåˆ›å»ºæ–°æ–‡ä»¶)
+	 * Ğ´Èë×Ö½ÚÊı×éÊı¾İµ½Ö¸¶¨Êä³öÁ÷ÖĞ(¸Ã·½·¨»á´´½¨ĞÂÎÄ¼ş)
 	 *
 	 * @param out
 	 * @param data
@@ -248,7 +248,7 @@ public class FileUtil {
 		}
 
 		if (out instanceof FileOutputStream) {
-			// é€šé“æ–¹å¼å†™å…¥
+			// Í¨µÀ·½Ê½Ğ´Èë
 			FileChannel outChannel = null;
 			try {
 				outChannel = ((FileOutputStream) out).getChannel();
@@ -259,7 +259,7 @@ public class FileUtil {
 				closeIO(outChannel);
 			}
 		} else {
-			// æ­£å¸¸ç¼“å­˜IOå†™å…¥
+			// Õı³£»º´æIOĞ´Èë
 			BufferedOutputStream bout = (out instanceof BufferedOutputStream) ? (BufferedOutputStream) out : new
 					BufferedOutputStream(out);
 			try {
@@ -273,7 +273,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥å­—èŠ‚æ•°ç»„æ•°æ®åˆ°æŒ‡å®šæ–‡ä»¶ä¸­(è¯¥æ–¹æ³•ä¼šåˆ›å»ºæ–°æ–‡ä»¶)
+	 * Ğ´Èë×Ö½ÚÊı×éÊı¾İµ½Ö¸¶¨ÎÄ¼şÖĞ(¸Ã·½·¨»á´´½¨ĞÂÎÄ¼ş)
 	 *
 	 * @param file
 	 * @param data
@@ -284,7 +284,7 @@ public class FileUtil {
 			fout = new FileOutputStream(file);
 			int size = data.length;
 			if (size > BIG_FILE_COUNT && size < Integer.MAX_VALUE) {
-				// ä½¿ç”¨Mapped
+				// Ê¹ÓÃMapped
 				writeBytesBigToFile(file, data, false);
 			} else {
 				writeBytes(fout, data);
@@ -297,7 +297,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥å’Œè¿½åŠ å­—èŠ‚æ•°ç»„ç±»å‹çš„å¤§æ–‡æœ¬æ•°æ®åˆ°æ–‡ä»¶ä¸­
+	 * Ğ´ÈëºÍ×·¼Ó×Ö½ÚÊı×éÀàĞÍµÄ´óÎÄ±¾Êı¾İµ½ÎÄ¼şÖĞ
 	 *
 	 * @param file
 	 * @param data
@@ -322,7 +322,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥å’Œè¿½åŠ å­—èŠ‚æ•°ç»„ç±»å‹çš„å¤§æ–‡æœ¬æ•°æ®åˆ°æ–‡ä»¶ä¸­
+	 * Ğ´ÈëºÍ×·¼Ó×Ö½ÚÊı×éÀàĞÍµÄ´óÎÄ±¾Êı¾İµ½ÎÄ¼şÖĞ
 	 *
 	 * @param filePath
 	 * @param data
@@ -333,7 +333,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥æŒ‡å®šç¼–ç çš„æ–‡æœ¬å­—ç¬¦ä¸²åˆ°æ–‡ä»¶ä¸­(è¯¥æ–¹æ³•ä¼šåˆ›å»ºæ–°æ–‡ä»¶)
+	 * Ğ´ÈëÖ¸¶¨±àÂëµÄÎÄ±¾×Ö·û´®µ½ÎÄ¼şÖĞ(¸Ã·½·¨»á´´½¨ĞÂÎÄ¼ş)
 	 *
 	 * @param file
 	 * @param data
@@ -348,7 +348,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥æŒ‡å®šç¼–ç çš„æ–‡æœ¬å­—ç¬¦ä¸²åˆ°æ–‡ä»¶ä¸­(è¯¥æ–¹æ³•ä¼šåˆ›å»ºæ–°æ–‡ä»¶)
+	 * Ğ´ÈëÖ¸¶¨±àÂëµÄÎÄ±¾×Ö·û´®µ½ÎÄ¼şÖĞ(¸Ã·½·¨»á´´½¨ĞÂÎÄ¼ş)
 	 *
 	 * @param filePath
 	 * @param data
@@ -359,7 +359,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥ç³»ç»Ÿé»˜è®¤ç¼–ç çš„æ–‡æœ¬å­—ç¬¦ä¸²åˆ°æ–‡ä»¶ä¸­(è¯¥æ–¹æ³•ä¼šåˆ›å»ºæ–°æ–‡ä»¶)
+	 * Ğ´ÈëÏµÍ³Ä¬ÈÏ±àÂëµÄÎÄ±¾×Ö·û´®µ½ÎÄ¼şÖĞ(¸Ã·½·¨»á´´½¨ĞÂÎÄ¼ş)
 	 *
 	 * @param file
 	 * @param data
@@ -369,7 +369,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å†™å…¥ç³»ç»Ÿé»˜è®¤ç¼–ç çš„æ–‡æœ¬å­—ç¬¦ä¸²åˆ°æ–‡ä»¶ä¸­(è¯¥æ–¹æ³•ä¼šåˆ›å»ºæ–°æ–‡ä»¶)
+	 * Ğ´ÈëÏµÍ³Ä¬ÈÏ±àÂëµÄÎÄ±¾×Ö·û´®µ½ÎÄ¼şÖĞ(¸Ã·½·¨»á´´½¨ĞÂÎÄ¼ş)
 	 *
 	 * @param filePath
 	 * @param data
@@ -398,7 +398,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * è¿½åŠ å­—èŠ‚æ•°ç»„ç±»å‹çš„æ•°æ®åˆ°æŒ‡å®šæ–‡ä»¶ä¸­
+	 * ×·¼Ó×Ö½ÚÊı×éÀàĞÍµÄÊı¾İµ½Ö¸¶¨ÎÄ¼şÖĞ
 	 *
 	 * @param filePath
 	 * @param data
@@ -411,7 +411,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * è¿½åŠ æŒ‡å®šç¼–ç æ ¼å¼çš„æ–‡æœ¬å­—ç¬¦ä¸²åˆ°æŒ‡å®šæ–‡ä»¶ä¸­
+	 * ×·¼ÓÖ¸¶¨±àÂë¸ñÊ½µÄÎÄ±¾×Ö·û´®µ½Ö¸¶¨ÎÄ¼şÖĞ
 	 *
 	 * @param file
 	 * @param data
@@ -426,7 +426,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * è¿½åŠ æŒ‡å®šç¼–ç æ ¼å¼çš„æ–‡æœ¬å­—ç¬¦ä¸²åˆ°æŒ‡å®šæ–‡ä»¶ä¸­
+	 * ×·¼ÓÖ¸¶¨±àÂë¸ñÊ½µÄÎÄ±¾×Ö·û´®µ½Ö¸¶¨ÎÄ¼şÖĞ
 	 *
 	 * @param filePath
 	 * @param data
@@ -437,7 +437,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å°†æŒ‡å®šè¾“å…¥æµæ•°æ®å†™å…¥åˆ°æŒ‡å®šè¾“å‡ºæµä¸­
+	 * ½«Ö¸¶¨ÊäÈëÁ÷Êı¾İĞ´Èëµ½Ö¸¶¨Êä³öÁ÷ÖĞ
 	 *
 	 * @param in
 	 * @param out
@@ -451,7 +451,7 @@ public class FileUtil {
 		}
 
 		if (in instanceof FileInputStream && out instanceof FileOutputStream) {
-			// ä½¿ç”¨é€šé“æ–¹å¼å¿«é€Ÿå¤åˆ¶
+			// Ê¹ÓÃÍ¨µÀ·½Ê½¿ìËÙ¸´ÖÆ
 			FileChannel inChannel = null;
 			FileChannel outChannel = null;
 			try {
@@ -464,7 +464,7 @@ public class FileUtil {
 				closeIO(inChannel, outChannel);
 			}
 		} else {
-			// ä½¿ç”¨æ™®é€šIOæ–¹å¼å¤åˆ¶
+			// Ê¹ÓÃÆÕÍ¨IO·½Ê½¸´ÖÆ
 			BufferedInputStream bin = null;
 			BufferedOutputStream bout = null;
 			try {
@@ -486,7 +486,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å°†æŒ‡å®šè¾“å…¥æ–‡ä»¶ä¿¡æ¯å†™å…¥åˆ°æŒ‡å®šè¾“å‡ºæ–‡ä»¶ä¸­
+	 * ½«Ö¸¶¨ÊäÈëÎÄ¼şĞÅÏ¢Ğ´Èëµ½Ö¸¶¨Êä³öÎÄ¼şÖĞ
 	 *
 	 * @param inFile
 	 * @param outFile
@@ -517,7 +517,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å°†æŒ‡å®šè¾“å…¥æ–‡ä»¶ä¿¡æ¯å†™å…¥åˆ°æŒ‡å®šè¾“å‡ºæ–‡ä»¶ä¸­
+	 * ½«Ö¸¶¨ÊäÈëÎÄ¼şĞÅÏ¢Ğ´Èëµ½Ö¸¶¨Êä³öÎÄ¼şÖĞ
 	 *
 	 * @param inFilePath
 	 * @param outFilePath
@@ -527,7 +527,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * åˆ›å»ºæŒ‡å®šè·¯å¾„æ–‡ä»¶å¤¹
+	 * ´´½¨Ö¸¶¨Â·¾¶ÎÄ¼ş¼Ğ
 	 *
 	 * @param dirPath
 	 */
@@ -542,7 +542,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * åˆ›å»ºæŒ‡å®šè·¯å¾„çš„çˆ¶è·¯å¾„
+	 * ´´½¨Ö¸¶¨Â·¾¶µÄ¸¸Â·¾¶
 	 *
 	 * @param childPath
 	 */
@@ -557,7 +557,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * é€’å½’åˆ é™¤æŒ‡å®šæ–‡ä»¶å¤¹
+	 * µİ¹éÉ¾³ıÖ¸¶¨ÎÄ¼ş¼Ğ
 	 *
 	 * @param dirPath
 	 */
@@ -577,11 +577,11 @@ public class FileUtil {
 
 
 	/**
-	 * æ£€éªŒè¾“å…¥å†…å®¹ä¸æ‰€ç»™MD5æ‘˜è¦æ˜¯å¦æƒ³ç­‰
+	 * ¼ìÑéÊäÈëÄÚÈİÓëËù¸øMD5ÕªÒªÊÇ·ñÏëµÈ
 	 *
 	 * @param data
-	 * @param md5Val MD5æ‘˜è¦å­—ç¬¦ä¸²
-	 * @param isHex  æ‰€æä¾›çš„md5ä¸²æ˜¯åå…­è¿›åˆ¶è¿˜æ˜¯Base64ç¼–ç 
+	 * @param md5Val MD5ÕªÒª×Ö·û´®
+	 * @param isHex  ËùÌá¹©µÄmd5´®ÊÇÊ®Áù½øÖÆ»¹ÊÇBase64±àÂë
 	 * @return
 	 */
 	public static boolean checkValid(byte[] data, String md5Val, boolean isHex) {
@@ -590,10 +590,10 @@ public class FileUtil {
 
 
 	/**
-	 * æ£€éªŒè¾“å…¥å†…å®¹ä¸æ‰€ç»™MD5æ‘˜è¦æ˜¯å¦æƒ³ç­‰
+	 * ¼ìÑéÊäÈëÄÚÈİÓëËù¸øMD5ÕªÒªÊÇ·ñÏëµÈ
 	 *
 	 * @param data
-	 * @param md5Val Base64ç¼–ç çš„MD5æ‘˜è¦å­—ç¬¦ä¸²
+	 * @param md5Val Base64±àÂëµÄMD5ÕªÒª×Ö·û´®
 	 * @return
 	 */
 	public static boolean checkValidBase64(String data, String md5Val) {
@@ -607,10 +607,10 @@ public class FileUtil {
 	}
 
 	/**
-	 * æ£€éªŒè¾“å…¥å†…å®¹ä¸æ‰€ç»™MD5æ‘˜è¦æ˜¯å¦æƒ³ç­‰
+	 * ¼ìÑéÊäÈëÄÚÈİÓëËù¸øMD5ÕªÒªÊÇ·ñÏëµÈ
 	 *
 	 * @param data
-	 * @param md5Val åå…­è¿›åˆ¶æ ¼å¼çš„MD5æ‘˜è¦å­—ç¬¦ä¸²
+	 * @param md5Val Ê®Áù½øÖÆ¸ñÊ½µÄMD5ÕªÒª×Ö·û´®
 	 * @return
 	 */
 	public static boolean checkValidHex(String data, String md5Val) {
@@ -625,7 +625,7 @@ public class FileUtil {
 
 
 	/**
-	 * è·å–æŒ‡å®šæ–‡ä»¶MD5å€¼å­—èŠ‚æ•°ç»„
+	 * »ñÈ¡Ö¸¶¨ÎÄ¼şMD5Öµ×Ö½ÚÊı×é
 	 *
 	 * @param filePath
 	 * @return
@@ -638,7 +638,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * è·å–æŒ‡å®šæ–‡ä»¶çš„åå…­è¿›åˆ¶MD5å€¼å­—ç¬¦ä¸²
+	 * »ñÈ¡Ö¸¶¨ÎÄ¼şµÄÊ®Áù½øÖÆMD5Öµ×Ö·û´®
 	 *
 	 * @param filePath
 	 * @return
@@ -648,7 +648,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * åˆ¤æ–­ä¸¤ä¸ªæ–‡ä»¶æ˜¯å¦ä¸€æ ·ï¼Œå³MD5å€¼æ˜¯å¦ç›¸åŒ
+	 * ÅĞ¶ÏÁ½¸öÎÄ¼şÊÇ·ñÒ»Ñù£¬¼´MD5ÖµÊÇ·ñÏàÍ¬
 	 *
 	 * @param fileAPath
 	 * @param fileBPath
@@ -670,10 +670,10 @@ public class FileUtil {
 		return result;
 	}
 
-	/* --------------------- ä»¥ä¸‹éƒ¨åˆ†ä»…é€‚ç”¨äºAndroidä¸‹å¼€å‘ --------------------- */
+	/* --------------------- ÒÔÏÂ²¿·Ö½öÊÊÓÃÓÚAndroidÏÂ¿ª·¢ --------------------- */
 
 	/**
-	 * æ£€æŸ¥SDå¡æ˜¯å¦å­˜åœ¨
+	 * ¼ì²éSD¿¨ÊÇ·ñ´æÔÚ
 	 *
 	 * @return
 	 */
@@ -682,9 +682,9 @@ public class FileUtil {
 	}
 
 	/**
-	 * è¿”å›æŒ‡å®šSDä¸‹æ–‡ä»¶çš„ç»å¯¹è·¯å¾„,å¹¶åˆ¤æ–­åˆ›å»ºå…¶çˆ¶è·¯å¾„
+	 * ·µ»ØÖ¸¶¨SDÏÂÎÄ¼şµÄ¾ø¶ÔÂ·¾¶,²¢ÅĞ¶Ï´´½¨Æä¸¸Â·¾¶
 	 *
-	 * @param relativeFilePath åŸºäºSDå¡è·¯å¾„çš„ç›¸å¯¹è·¯å¾„
+	 * @param relativeFilePath »ùÓÚSD¿¨Â·¾¶µÄÏà¶ÔÂ·¾¶
 	 * @return
 	 */
 	public static String getExternalFilePath(String relativeFilePath) {
@@ -697,7 +697,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å°†uriè½¬æ¢ä¸ºæ–‡ä»¶è·¯å¾„å­—ç¬¦ä¸²
+	 * ½«uri×ª»»ÎªÎÄ¼şÂ·¾¶×Ö·û´®
 	 *
 	 * @param activity
 	 * @param uri
@@ -705,7 +705,7 @@ public class FileUtil {
 	 */
 	public static String uriToString(Activity activity, Uri uri) {
 		if (SystemTool.getSDKVersion() < 11) {
-			// åœ¨API11ä»¥ä¸‹å¯ä»¥ä½¿ç”¨ï¼šmanagedQuery
+			// ÔÚAPI11ÒÔÏÂ¿ÉÒÔÊ¹ÓÃ£ºmanagedQuery
 			String[] proj = {MediaStore.Images.Media.DATA};
 			@SuppressWarnings("deprecation")
 			Cursor actualimagecursor = activity.managedQuery(uri, proj, null, null,
@@ -717,7 +717,7 @@ public class FileUtil {
 					.getString(actual_image_column_index);
 			return img_path;
 		} else {
-			// åœ¨API11ä»¥ä¸Šï¼šè¦è½¬ä¸ºä½¿ç”¨CursorLoader,å¹¶ä½¿ç”¨loadInBackgroundæ¥è¿”å›
+			// ÔÚAPI11ÒÔÉÏ£ºÒª×ªÎªÊ¹ÓÃCursorLoader,²¢Ê¹ÓÃloadInBackgroundÀ´·µ»Ø
 			String[] projection = {MediaStore.Images.Media.DATA};
 			CursorLoader loader = new CursorLoader(activity, uri, projection, null,
 					null, null);
@@ -730,7 +730,7 @@ public class FileUtil {
 	}
 
 	/**
-	 * å°†uriè½¬æ¢ä¸ºFileå¯¹è±¡
+	 * ½«uri×ª»»ÎªFile¶ÔÏó
 	 *
 	 * @param activity
 	 * @param uri
