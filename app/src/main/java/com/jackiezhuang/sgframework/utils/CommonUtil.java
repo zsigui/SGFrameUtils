@@ -8,6 +8,8 @@ import java.util.Locale;
  */
 public class CommonUtil {
 
+	private static final String PRE_TAG = CommonUtil.class.getName();
+
 	/**
 	 * 判断给定对象是否为空
 	 *
@@ -28,7 +30,10 @@ public class CommonUtil {
 	 * @param bs
 	 * @return
 	 */
-	public static String bytes2Hex(byte[] bs) {
+	public static String bytes2Hex(byte... bs) {
+		if (isEmpty(bs)) {
+			throw new IllegalArgumentException(PRE_TAG + ".bytes2Hex : param bs(byte...) is null");
+		}
 		StringBuilder builder = new StringBuilder();
 		for (byte b : bs) {
 			int bt = b & 0xff;
@@ -47,6 +52,9 @@ public class CommonUtil {
 	 * @return
 	 */
 	public static byte[] hex2Bytes(String hex) {
+		if (isEmpty(hex)) {
+			throw new IllegalArgumentException(PRE_TAG + ".hex2Bytes : param hex(String...) is null");
+		}
 		if (hex.length() % 2 == 1)
 			hex += '0';
 		byte[] result = new byte[hex.length() / 2];
@@ -56,6 +64,35 @@ public class CommonUtil {
 			result[i] = (byte) (char2Byte(cs[pos]) << 4 | char2Byte(cs[pos + 1]));
 		}
 		return result;
+	}
+
+	/**
+	 * 将字节数组转为十六进制表示的MAC地址
+	 *
+	 * @param bs
+	 * @return
+	 */
+	public static String byte2MacStr(byte[] bs) {
+		if (isEmpty(bs)) {
+			throw new IllegalArgumentException(PRE_TAG + ".byte2MacStr : param bs(byte[]) is null");
+		}
+		StringBuilder sb = new StringBuilder(bs.length);
+		for (byte b : bs) {
+			sb.append(":");
+			sb.append(bytes2Hex(b));
+		}
+		sb.deleteCharAt(0);
+		return sb.toString();
+	}
+
+	/**
+	 * 将整形转换为点十六进制表示法的IP地址
+	 *
+	 * @param info
+	 * @return
+	 */
+	public static String int2IpStr(int info) {
+		return (info & 0xFF) + "." + (info >> 8 & 0xFF) + "." + (info >> 16 & 0xFF) + "." + (info >> 24 & 0xFF);
 	}
 
 	/**
