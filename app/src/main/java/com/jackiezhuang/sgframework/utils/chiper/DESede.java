@@ -3,7 +3,7 @@ package com.jackiezhuang.sgframework.utils.chiper;
 import android.util.Base64;
 
 import com.jackiezhuang.sgframework.utils.CommonUtil;
-import com.jackiezhuang.sgframework.utils.FileUtil;
+import com.jackiezhuang.sgframework.utils.SGConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -51,10 +51,10 @@ public class DESede {
 			if (msg == null)
 				return null;
 			if (key == null || key.length == 0)
-				key = genKeyByte(DEFAULT_KEY.getBytes(FileUtil.DEFAULT_CHARSET),
+				key = genKeyByte(DEFAULT_KEY.getBytes(SGConfig.DEFAULT_SYS_CHARSET),
 						DEFAULT_KEY_SIZE);
 			if (bIv == null || bIv.length == 0)
-				bIv = genKeyByte(DEFAULT_IV.getBytes(FileUtil.DEFAULT_CHARSET),
+				bIv = genKeyByte(DEFAULT_IV.getBytes(SGConfig.DEFAULT_SYS_CHARSET),
 						DEFAULT_IV_SIZE);
 			if (bIv.length < DEFAULT_IV_SIZE)
 				bIv = genKeyByte(bIv, DEFAULT_IV_SIZE);
@@ -122,7 +122,7 @@ public class DESede {
 	 * @return
 	 */
 	public static String encryptInBase64(String msg, String key) {
-		return encryptInBase64(msg, key, DEFAULT_IV, FileUtil.DEFAULT_CHARSET);
+		return encryptInBase64(msg, key, DEFAULT_IV, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class DESede {
 	 * @return
 	 */
 	public static String encryptInHex(String msg, String key) {
-		return encryptInHex(msg, key, DEFAULT_IV, FileUtil.DEFAULT_CHARSET);
+		return encryptInHex(msg, key, DEFAULT_IV, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -186,10 +186,10 @@ public class DESede {
 			if (msg == null)
 				return null;
 			if (key == null || key.length == 0)
-				key = genKeyByte(DEFAULT_KEY.getBytes(FileUtil.DEFAULT_CHARSET),
+				key = genKeyByte(DEFAULT_KEY.getBytes(SGConfig.DEFAULT_SYS_CHARSET),
 						DEFAULT_KEY_SIZE);
 			if (bIv == null || bIv.length == 0)
-				bIv = genKeyByte(DEFAULT_IV.getBytes(FileUtil.DEFAULT_CHARSET),
+				bIv = genKeyByte(DEFAULT_IV.getBytes(SGConfig.DEFAULT_SYS_CHARSET),
 						DEFAULT_IV_SIZE);
 			if (bIv.length < DEFAULT_IV_SIZE)
 				bIv = genKeyByte(bIv, DEFAULT_IV_SIZE);
@@ -198,7 +198,7 @@ public class DESede {
 			IvParameterSpec iv = new IvParameterSpec(bIv);
 			Cipher cipher = Cipher.getInstance(DEFAULT_TRANSFORMATION);
 			cipher.init(Cipher.DECRYPT_MODE, desKey, iv);
-			result = new String(cipher.doFinal(msg), FileUtil.DEFAULT_CHARSET);
+			result = new String(cipher.doFinal(msg), SGConfig.DEFAULT_SYS_CHARSET);
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
@@ -254,7 +254,7 @@ public class DESede {
 	 * @return
 	 */
 	public static String decryptInBase64(String msg, String key) {
-		return decryptInBase64(msg, key, DEFAULT_IV, FileUtil.DEFAULT_CHARSET);
+		return decryptInBase64(msg, key, DEFAULT_IV, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -299,7 +299,7 @@ public class DESede {
 	 * @return
 	 */
 	public static String decryptInHex(String msg, String key) {
-		return decryptInHex(msg, key, DEFAULT_IV, FileUtil.DEFAULT_CHARSET);
+		return decryptInHex(msg, key, DEFAULT_IV, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**

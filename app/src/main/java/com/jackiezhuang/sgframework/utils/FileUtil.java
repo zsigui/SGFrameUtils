@@ -9,9 +9,6 @@ import android.provider.MediaStore;
 
 import com.jackiezhuang.sgframework.utils.chiper.MD5;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +22,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 
 /**
  * 文件操作工具类
@@ -37,7 +33,6 @@ public class FileUtil {
 	private static final String PRE_TAG = FileUtil.class.toString();
 	// 定义3MB为大小文件分隔
 	private static final int BIG_FILE_COUNT = 3 * 1024 * 1024;
-	public static final String DEFAULT_CHARSET = Charset.defaultCharset().displayName();
 
 
 	/**
@@ -91,25 +86,8 @@ public class FileUtil {
 				closeIO(fc);
 			}
 		} else {
-
 			// 使用普通IO流读取
-			BufferedInputStream bis = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new
-					BufferedInputStream(in);
-			try {
-				byte[] tempBuf = new byte[1024];
-				int length;
-				ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream(bis.available());
-				while ((length = bis.read(tempBuf)) != -1) {
-					byteOutStream.write(tempBuf, 0, length);
-				}
-				byteOutStream.flush();
-				result = byteOutStream.toByteArray();
-				byteOutStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				closeIO(bis);
-			}
+			result = IOUtil.readBytes(in);
 		}
 
 		return result;
@@ -220,7 +198,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static String readString(String filePath) {
-		return readString(filePath, DEFAULT_CHARSET);
+		return readString(filePath, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -230,7 +208,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static String readString(File file) {
-		return readString(file, DEFAULT_CHARSET);
+		return readString(file, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -259,16 +237,8 @@ public class FileUtil {
 				closeIO(outChannel);
 			}
 		} else {
-			// 正常缓存IO写入
-			BufferedOutputStream bout = (out instanceof BufferedOutputStream) ? (BufferedOutputStream) out : new
-					BufferedOutputStream(out);
-			try {
-				bout.write(data);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				closeIO(bout);
-			}
+			// 普通IO写入
+			IOUtil.writeBytes(out, data);
 		}
 	}
 
@@ -365,7 +335,7 @@ public class FileUtil {
 	 * @param data
 	 */
 	public static void writeString(File file, String data) {
-		writeString(file, data, DEFAULT_CHARSET);
+		writeString(file, data, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -375,7 +345,7 @@ public class FileUtil {
 	 * @param data
 	 */
 	public static void writeString(String filePath, String data) {
-		writeString(filePath, data, DEFAULT_CHARSET);
+		writeString(filePath, data, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	public static void appendBytes(File file, byte[] data) {
@@ -465,23 +435,7 @@ public class FileUtil {
 			}
 		} else {
 			// 使用普通IO方式复制
-			BufferedInputStream bin = null;
-			BufferedOutputStream bout = null;
-			try {
-				bin = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new BufferedInputStream(in);
-				bout = (out instanceof BufferedOutputStream) ? (BufferedOutputStream) out : new BufferedOutputStream
-						(out);
-				byte[] bs = new byte[1024];
-				int length;
-				while ((length = bin.read(bs, 0, bs.length)) != -1) {
-					bout.write(bs, 0, length);
-				}
-				bout.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				closeIO(bin, bout);
-			}
+			IOUtil.copy(in, out);
 		}
 	}
 
@@ -599,7 +553,7 @@ public class FileUtil {
 	public static boolean checkValidBase64(String data, String md5Val) {
 		boolean result = false;
 		try {
-			result = checkValid(data.getBytes(DEFAULT_CHARSET), md5Val, false);
+			result = checkValid(data.getBytes(SGConfig.DEFAULT_SYS_CHARSET), md5Val, false);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -616,7 +570,7 @@ public class FileUtil {
 	public static boolean checkValidHex(String data, String md5Val) {
 		boolean result = false;
 		try {
-			result = checkValid(data.getBytes(DEFAULT_CHARSET), md5Val, true);
+			result = checkValid(data.getBytes(SGConfig.DEFAULT_SYS_CHARSET), md5Val, true);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

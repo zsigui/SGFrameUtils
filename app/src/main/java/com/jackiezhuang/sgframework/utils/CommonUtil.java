@@ -1,6 +1,10 @@
 package com.jackiezhuang.sgframework.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 通用操作工具
@@ -17,11 +21,19 @@ public class CommonUtil {
 	 * @return
 	 */
 	public static boolean isEmpty(Object obj) {
-		if (obj instanceof CharSequence) {
-			return obj == null || ((String) obj).isEmpty();
-		} else {
-			return obj == null;
+		boolean result = obj == null;
+		if (!result) {
+			if (obj instanceof CharSequence) {
+				result = ((String) obj).isEmpty();
+			} else if (obj instanceof Map) {
+				result = ((Map) obj).isEmpty();
+			} else if (obj instanceof List) {
+				result = ((List) obj).isEmpty();
+			} else if (obj instanceof Set) {
+				result = ((Set) obj).isEmpty();
+			}
 		}
+		return result;
 	}
 
 	/**
@@ -101,7 +113,27 @@ public class CommonUtil {
 	 * @param c
 	 * @return
 	 */
-	private static byte char2Byte(char c) {
+	public static byte char2Byte(char c) {
 		return (byte) "0123456789abcdefg".indexOf(c);
+	}
+
+	/**
+	 * 将字节数组转换为指定格式编码的字符串
+	 */
+	public static String toString(byte[] data, String charset) {
+		String result = null;
+		try {
+			result = new String(data, charset);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	/**
+	 * 将字节数组转换为系统默认格式编码的字符串
+	 */
+	public static String toString(byte[] data) {
+		return toString(data, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 }

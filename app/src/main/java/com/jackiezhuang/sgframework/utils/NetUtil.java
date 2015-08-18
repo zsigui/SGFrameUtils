@@ -115,8 +115,10 @@ public class NetUtil {
 	 * 获取当前网络类型
 	 * 2G, 3G, WIFI, WAP
 	 *
-	 * @param context
-	 * @return
+	 * @see #TYPE_NET_2G
+	 * @see #TYPE_NET_3G
+	 * @see #TYPE_NET_WIFI
+	 * @see #TYPE_NET_WAP
 	 */
 	public static int getNetType(Context context) {
 		int type = NetUtil.TYPE_UNKNOWN;
@@ -205,9 +207,6 @@ public class NetUtil {
 
 	/**
 	 * 获取WIFI连接下的IP地址
-	 *
-	 * @param context
-	 * @return
 	 */
 	public static String getIpInWifi(Context context) {
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -216,6 +215,27 @@ public class NetUtil {
 			return CommonUtil.int2IpStr(wifiInfo.getIpAddress());
 		}
 		return null;
+	}
+
+	/**
+	 * 通过属性名获取WIFI连接下自动分配的DHCP信息属性
+	 *
+	 * @param context 上下文
+	 * @param name    DhcpInfo属性名
+	 * @see #DNS1
+	 * @see #DNS2
+	 * @see #IP_ADDRESS
+	 * @see #GATE_WAY
+	 * @see #NET_MASK
+	 * @see #SERVER_ADDRESS
+	 */
+	public static String getDhcpInfoByName(Context context, String name) {
+		String result = null;
+		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+		if (wifiManager != null) {
+			result = ReflectUtil.getField(name, wifiManager.getDhcpInfo());
+		}
+		return result;
 	}
 
 	public static boolean tryConnectUrl() {

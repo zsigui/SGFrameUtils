@@ -3,7 +3,7 @@ package com.jackiezhuang.sgframework.utils.chiper;
 import android.util.Base64;
 
 import com.jackiezhuang.sgframework.utils.CommonUtil;
-import com.jackiezhuang.sgframework.utils.FileUtil;
+import com.jackiezhuang.sgframework.utils.SGConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -288,7 +288,7 @@ public class DH {
 	 */
 	public static String encryptInBase64(String data, String ApubKey,
 	                                     String BprvKey) {
-		return encryptInBase64(data, ApubKey, BprvKey, FileUtil.DEFAULT_CHARSET);
+		return encryptInBase64(data, ApubKey, BprvKey, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -322,7 +322,7 @@ public class DH {
 	 */
 	public static String encryptInHex(String data, String ApubKey,
 	                                  String BprvKey) {
-		return encryptInHex(data, ApubKey, BprvKey, FileUtil.DEFAULT_CHARSET);
+		return encryptInHex(data, ApubKey, BprvKey, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -368,7 +368,7 @@ public class DH {
 	 */
 	public static String decryptInBase64(String data, String BpubKey,
 	                                     String AprvKey) {
-		return decryptInBase64(data, BpubKey, AprvKey, FileUtil.DEFAULT_CHARSET);
+		return decryptInBase64(data, BpubKey, AprvKey, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
@@ -402,6 +402,6 @@ public class DH {
 	 */
 	public static String decryptInHex(String data, String BpubKey,
 	                                  String AprvKey) {
-		return decryptInHex(data, BpubKey, AprvKey, FileUtil.DEFAULT_CHARSET);
+		return decryptInHex(data, BpubKey, AprvKey, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 }

@@ -3,14 +3,14 @@ package com.jackiezhuang.sgframework.utils.chiper;
 import android.util.Base64;
 
 import com.jackiezhuang.sgframework.utils.CommonUtil;
-import com.jackiezhuang.sgframework.utils.FileUtil;
+import com.jackiezhuang.sgframework.utils.SGConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
  * MD5摘要算法类
- *
+ * <p/>
  * Created by zsigui on 15-8-17.
  */
 public class MD5 {
@@ -21,7 +21,7 @@ public class MD5 {
 	 * @return
 	 */
 	public static byte[] genDigest(String content) {
-		return genDigest(content, FileUtil.DEFAULT_CHARSET);
+		return genDigest(content, SGConfig.DEFAULT_SYS_CHARSET);
 	}
 
 	/**
