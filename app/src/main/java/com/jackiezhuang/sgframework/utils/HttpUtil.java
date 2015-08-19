@@ -40,6 +40,43 @@ public class HttpUtil {
 	}
 
 	/**
+	 * 构造发送的正文参数字符串
+	 *
+	 * @param data 键值参数
+	 */
+	private static String constructParams(final Map<String, String> data) {
+		final StringBuilder result = new StringBuilder();
+		try {
+			if (data != null && data.size() > 0) {
+				for (Map.Entry<String, String> param : data.entrySet()) {
+					result.append(URLEncoder.encode(param.getKey(), SGConfig.DEFAULT_UTF_CHARSET));
+					result.append("=");
+					result.append(URLEncoder.encode(param.getValue(), SGConfig.DEFAULT_UTF_CHARSET));
+					result.append("&");
+				}
+				result.deleteCharAt(result.length() - 1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result.toString();
+	}
+
+	/**
+	 * 进行HTTP请求需要保证地址前缀http://,该方法用于添加前缀
+	 *
+	 * @param requestUrl
+	 * @return
+	 */
+	public static String fixUrl(String requestUrl) {
+		String realUrl = requestUrl;
+		if (!realUrl.startsWith("http://")) {
+			realUrl = "http://" + realUrl;
+		}
+		return realUrl;
+	}
+
+	/**
 	 * 构造进行Get操作的Url字符串
 	 */
 	private static String createGetUrl(String reqUrl, String params) {
@@ -62,7 +99,30 @@ public class HttpUtil {
 		return realUrl;
 	}
 
-	private static byte[] work(String requestUrl, IRequest requestOp) {
+
+	/**
+	 * HttpUrlConnection对象的默认配置流程
+	 */
+	private static void defaultConfig(IRequest requestOp, HttpURLConnection urlConnection) throws IOException {
+		// 此部分进行默认设置,可以在IRequest回调函数中进行重配
+		urlConnection.setRequestMethod(METHOD_GET);
+		urlConnection.setDoInput(true);
+		urlConnection.setDoOutput(false);
+		urlConnection.setConnectTimeout(sConnTimeout);
+		urlConnection.setReadTimeout(sReadTimeout);
+		urlConnection.setDefaultUseCaches(false);
+
+		requestOp.beforeConnect(urlConnection);
+		urlConnection.connect();
+		requestOp.afterConnect(urlConnection);
+	}
+
+	/**
+	 * 执行Http请求并返回字节数组结果
+	 * <p>需要在{@link com.jackiezhuang.sgframework.utils.HttpUtil.IRequest}的beforeRequest方法设置Http请求类型<p/>
+	 * <p>默认为GET请求<p/>
+	 */
+	public static byte[] requestForBytesResponse(String requestUrl, IRequest requestOp) {
 		byte[] result = null;
 		HttpURLConnection urlConnection = null;
 		try {
@@ -70,24 +130,64 @@ public class HttpUtil {
 			urlConnection = (HttpURLConnection) url.openConnection();
 
 			// 此部分进行默认设置,可以在IRequest回调函数中进行重配
-			urlConnection.setRequestMethod(METHOD_GET);
-			urlConnection.setDoInput(true);
-			urlConnection.setDoOutput(false);
-			urlConnection.setConnectTimeout(sConnTimeout);
-			urlConnection.setReadTimeout(sReadTimeout);
-			urlConnection.setDefaultUseCaches(false);
-
-			requestOp.beforeConnect(urlConnection);
-			urlConnection.connect();
-			requestOp.afterConnect(urlConnection);
+			defaultConfig(requestOp, urlConnection);
 
 			if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+
+				String encoding = urlConnection.getContentEncoding();
 				InputStream in = urlConnection.getInputStream();
+				if (encoding != null && encoding.contains("gzip")) {
+					// 使用Gzip流方式进行读取
+					in = new GZIPInputStream(in);
+				}
 				result = IOUtil.readBytes(in);
 				in.close();
 			} else {
-				L.i(PRE_TAG, "work return failed : code = " + urlConnection.getResponseCode() + ", " +
-						"msg = " + urlConnection.getResponseMessage());
+				L.i(PRE_TAG, "requestForBytesResponse return failed : code = " + urlConnection.getResponseCode() +
+						", msg = " + urlConnection.getResponseMessage());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (urlConnection != null)
+				urlConnection.disconnect();
+		}
+		return result;
+	}
+
+	/**
+	 * 执行Http请求并返回解析获取的编码格式字符串
+	 * <p>需要在{@link com.jackiezhuang.sgframework.utils.HttpUtil.IRequest}的beforeRequest方法设置Http请求类型<p/>
+	 * <p>默认为GET请求<p/>
+	 */
+	public static String requestForStringResponse(String requestUrl, IRequest requestOp) {
+		String result = null;
+		HttpURLConnection urlConnection = null;
+		try {
+			URL url = new URL(requestUrl);
+			urlConnection = (HttpURLConnection) url.openConnection();
+			defaultConfig(requestOp, urlConnection);
+
+			if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+
+				String encoding = urlConnection.getContentEncoding();
+				String contentType = urlConnection.getContentType();
+				String charset = SGConfig.DEFAULT_UTF_CHARSET;
+				try {
+					charset = contentType.substring(contentType.indexOf("charset=") + 8);
+				} catch (IndexOutOfBoundsException e) {
+				}
+
+				InputStream in = urlConnection.getInputStream();
+				if (encoding != null && encoding.contains("gzip")) {
+					// 使用Gzip流方式进行读取
+					in = new GZIPInputStream(in);
+				}
+				result = CommonUtil.toString(IOUtil.readBytes(in), charset);
+				in.close();
+			} else {
+				L.i(PRE_TAG, "requestForBytesResponse return failed : code = " + urlConnection.getResponseCode() +
+						", msg = " + urlConnection.getResponseMessage());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -109,7 +209,7 @@ public class HttpUtil {
 			throw new IllegalArgumentException(PRE_TAG + ".doGet : param requestUrl(String) is null");
 		}
 		String realUrl = createGetUrl(requestUrl, requestData);
-		byte[] result = work(realUrl, new IRequest() {
+		byte[] result = requestForBytesResponse(realUrl, new IRequest() {
 			@Override
 			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
 				urlConnection.setRequestMethod(METHOD_GET);
@@ -142,100 +242,148 @@ public class HttpUtil {
 		if (CommonUtil.isEmpty(requestUrl)) {
 			throw new IllegalArgumentException(PRE_TAG + ".doGet : param requestUrl(String) is null");
 		}
-		StringBuilder param = new StringBuilder();
-		if (!CommonUtil.isEmpty(requestData)) {
-			try {
-				for (Map.Entry<String, String> item : requestData.entrySet()) {
-					param.append(URLEncoder.encode(item.getKey(), SGConfig.DEFAULT_UTF_CHARSET));
-					param.append("=");
-					param.append(URLEncoder.encode(item.getValue(), SGConfig.DEFAULT_UTF_CHARSET));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return doGet(requestUrl, param.toString());
-	}
-
-
-	public static void doPost(String requestUrl, Map<String, String> data) throws IOException {
-		// 使用Url
-		URL url = new URL(requestUrl);
-		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-		urlConnection.setRequestMethod(METHOD_POST);
-		urlConnection.setDoInput(true);
-		urlConnection.setDoOutput(true);
-		urlConnection.setConnectTimeout(sConnTimeout);
-		urlConnection.setReadTimeout(sReadTimeout);
-		urlConnection.setDefaultUseCaches(false);
-
-		// 此部分设置传参数或上传文件
-		urlConnection.setChunkedStreamingMode(0);   // 未知文件大小
-		//urlConnection.setFixedLengthStreamingMode(10000); //已知文件大小
-
-		StringBuilder paramStr = new StringBuilder();
-		if (data != null && data.size() > 0) {
-			for (Map.Entry<String, String> param : data.entrySet()) {
-				paramStr.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-				paramStr.append("=");
-				paramStr.append(URLEncoder.encode(param.getValue(), "UTF-8"));
-				paramStr.append("&");
-			}
-			paramStr.deleteCharAt(paramStr.length() - 1);
-		}
-
-		// 设置请求头参数
-		urlConnection.setRequestProperty("Connection", "Keep-Alive");
-		urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-		urlConnection.setRequestProperty("ContentType", "application/x-www-form-urlencoded; charset=UTF-8");
-		urlConnection.setRequestProperty("Content-Length", String.valueOf(paramStr.length()));
-
-		urlConnection.connect();
-
-		// post表单
-		DataOutputStream bos = new DataOutputStream(urlConnection.getOutputStream());
-		bos.write(paramStr.toString().getBytes());
-		bos.flush();
-		bos.close();
-
-
-		if (urlConnection.getResponseCode() == 200) {
-			byte[] buf = new byte[1024];
-			String encoding = urlConnection.getContentEncoding();
-			String contentType = urlConnection.getContentType();
-			String charset = SGConfig.DEFAULT_UTF_CHARSET;
-			try {
-				charset = contentType.substring(contentType.indexOf("charset=") + 8);
-			} catch (IndexOutOfBoundsException e) {
-
-			}
-
-			InputStream in = urlConnection.getInputStream();
-			if (encoding != null && encoding.contains("gzip")) {
-				// 使用Gzip流方式进行读取
-				in = new GZIPInputStream(in);
-			}
-			String result = CommonUtil.toString(IOUtil.readBytes(in), charset);
-		} else {
-			L.i(PRE_TAG, "doPost return failed : code = " + urlConnection.getResponseCode() + ", " +
-					"msg = " + urlConnection.getResponseMessage());
-		}
-		urlConnection.disconnect();
-
+		return doGet(requestUrl, constructParams(requestData));
 	}
 
 	/**
-	 * 进行HTTP请求需要保证地址前缀http://,该方法用于添加前缀
+	 * 进行Http的Get操作
 	 *
-	 * @param requestUrl
-	 * @return
+	 * @param requestUrl  请求进行Get的Url字符串
+	 * @param requestData get参数,用户需要使用UTF-8进行UrlEncode,null表示不传
 	 */
-	public static String fixUrl(String requestUrl) {
-		String realUrl = requestUrl;
-		if (!realUrl.startsWith("http://")) {
-			realUrl = "http://" + realUrl;
+	public static String doGetString(String requestUrl, String requestData) {
+		if (CommonUtil.isEmpty(requestUrl)) {
+			throw new IllegalArgumentException(PRE_TAG + ".doGetString : param requestUrl(String) is null");
 		}
-		return realUrl;
+		String realUrl = createGetUrl(requestUrl, requestData);
+		String result = requestForStringResponse(realUrl, new IRequest() {
+			@Override
+			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
+				urlConnection.setRequestMethod(METHOD_GET);
+				urlConnection.setDoInput(true);
+				urlConnection.setDoOutput(false);
+				urlConnection.setConnectTimeout(sConnTimeout);
+				urlConnection.setReadTimeout(sReadTimeout);
+				urlConnection.setDefaultUseCaches(false);
+				// 设置请求头参数
+				urlConnection.setRequestProperty("Connection", "Keep-Alive");
+				urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+				urlConnection.setRequestProperty("ContentType", "application/x-www-form-urlencoded; charset=UTF-8");
+			}
+
+			@Override
+			public void afterConnect(HttpURLConnection urlConnection) throws IOException {
+				// GET无须
+			}
+		});
+		return result;
+	}
+
+	/**
+	 * 进行Http的Get操作
+	 *
+	 * @param requestUrl  请求进行Get的Url字符串
+	 * @param requestData get参数,会默认使用UTF-8进行UrlEncode,null表示不传
+	 */
+	public static String doGetString(String requestUrl, Map<String, String> requestData) {
+		if (CommonUtil.isEmpty(requestUrl)) {
+			throw new IllegalArgumentException(PRE_TAG + ".doGeString : param requestUrl(String) is null");
+		}
+		return doGetString(requestUrl, constructParams(requestData));
+	}
+
+	/**
+	 * 进行Http的Post操作
+	 *
+	 * @param requestUrl 请求执行Post地址
+	 * @param data       Post参数,无则传null
+	 */
+	public static byte[] doPost(String requestUrl, Map<String, String> data) {
+		if (CommonUtil.isEmpty(requestUrl)) {
+			throw new IllegalArgumentException(PRE_TAG + ".doPost : param requestUrl(String) is null");
+		}
+		final String paramStr = constructParams(data);
+		String realUrl = createGetUrl(requestUrl, null);
+		byte[] result = requestForBytesResponse(realUrl, new IRequest() {
+			@Override
+			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
+				urlConnection.setRequestMethod(METHOD_POST);
+				urlConnection.setDoOutput(true);
+				urlConnection.setConnectTimeout(sConnTimeout);
+				urlConnection.setReadTimeout(sReadTimeout);
+				urlConnection.setDefaultUseCaches(false);
+				if (!CommonUtil.isEmpty(paramStr)) {
+					// 此部分设置传参数或上传文件
+					urlConnection.setDoInput(true);
+					urlConnection.setChunkedStreamingMode(0);   // 未知文件大小
+					//urlConnection.setFixedLengthStreamingMode(10000); //已知文件大小
+				}
+				// 设置请求头参数
+				urlConnection.setRequestProperty("Connection", "Keep-Alive");
+				urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+				urlConnection.setRequestProperty("ContentType", "application/x-www-form-urlencoded; charset=UTF-8");
+			}
+
+			@Override
+			public void afterConnect(HttpURLConnection urlConnection) throws IOException {
+				if (CommonUtil.isEmpty(paramStr)) {
+					return;
+				}
+				// post表单
+				DataOutputStream bos = new DataOutputStream(urlConnection.getOutputStream());
+				bos.write(paramStr.getBytes(SGConfig.DEFAULT_SYS_CHARSET));
+				bos.flush();
+				bos.close();
+			}
+		});
+		return result;
+	}
+
+	/**
+	 * 进行Http的Post操作
+	 *
+	 * @param requestUrl 请求执行Post地址
+	 * @param data       Post参数,无则传null
+	 */
+	public static String doPostString(String requestUrl, Map<String, String> data) {
+		if (CommonUtil.isEmpty(requestUrl)) {
+			throw new IllegalArgumentException(PRE_TAG + ".doPost : param requestUrl(String) is null");
+		}
+		final String paramStr = constructParams(data);
+		String realUrl = createGetUrl(requestUrl, null);
+		String result = requestForStringResponse(realUrl, new IRequest() {
+			@Override
+			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
+				urlConnection.setRequestMethod(METHOD_POST);
+				urlConnection.setDoOutput(true);
+				urlConnection.setConnectTimeout(sConnTimeout);
+				urlConnection.setReadTimeout(sReadTimeout);
+				urlConnection.setDefaultUseCaches(false);
+				if (!CommonUtil.isEmpty(paramStr)) {
+					// 此部分设置传参数或上传文件
+					urlConnection.setDoInput(true);
+					urlConnection.setChunkedStreamingMode(0);   // 未知文件大小
+					//urlConnection.setFixedLengthStreamingMode(10000); //已知文件大小
+				}
+				// 设置请求头参数
+				urlConnection.setRequestProperty("Connection", "Keep-Alive");
+				urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+				urlConnection.setRequestProperty("ContentType", "application/x-www-form-urlencoded; charset=UTF-8");
+			}
+
+			@Override
+			public void afterConnect(HttpURLConnection urlConnection) throws IOException {
+				if (CommonUtil.isEmpty(paramStr)) {
+					return;
+				}
+				// post表单
+				DataOutputStream bos = new DataOutputStream(urlConnection.getOutputStream());
+				bos.write(paramStr.getBytes(SGConfig.DEFAULT_SYS_CHARSET));
+				bos.flush();
+				bos.close();
+			}
+		});
+		return result;
 	}
 
 	/**
