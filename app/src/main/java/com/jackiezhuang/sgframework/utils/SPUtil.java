@@ -12,7 +12,7 @@ import java.util.Set;
  *
  * Created by zsigui on 15-8-10.
  */
-public class SPUtil {
+public final class SPUtil {
 	/**
 	 * 默认字符,空
 	 */

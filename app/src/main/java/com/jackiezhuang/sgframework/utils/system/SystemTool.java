@@ -1,11 +1,11 @@
-package com.jackiezhuang.sgframework.utils;
+package com.jackiezhuang.sgframework.utils.system;
 
 import android.os.Build;
 
 /**
  * Created by zsigui on 15-8-17.
  */
-public class SystemTool {
+public final class SystemTool {
 
 	/**
 	 * 返回系统的SDK版本号

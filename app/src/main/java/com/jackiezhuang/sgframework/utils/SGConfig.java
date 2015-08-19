@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
  *
  * Created by zsigui on 15-8-18.
  */
-public class SGConfig {
+public final class SGConfig {
 
 	/**
 	 * 系统默认编码格式,从系统获取

@@ -7,6 +7,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
+import com.jackiezhuang.sgframework.utils.http.HttpUtil;
+
 import org.apache.http.conn.util.InetAddressUtils;
 
 import java.net.InetAddress;
@@ -21,7 +23,7 @@ import java.util.Enumeration;
  * <p/>
  * Created by JackieZhuang on 2015/8/18.
  */
-public class NetUtil {
+public final class NetUtil {
 
 	/**
 	 * 连接正常，成功标志
@@ -238,8 +240,18 @@ public class NetUtil {
 		return result;
 	}
 
-	public static boolean tryConnectUrl() {
+	/**
+	 * 通过试连接指定Url地址来判断网络是否良好,地址为空则默认"http://www.baidu.com"
+	 */
+	public static boolean tryConnectUrl(String url) {
+		if (CommonUtil.isEmpty(url)) {
+			url = "http://www.baidu.com";
+		}
 		boolean result = false;
+		byte[] tmp = HttpUtil.doGet(url);
+		if (!CommonUtil.isEmpty(tmp)) {
+			result = true;
+		}
 		return result;
 	}
 

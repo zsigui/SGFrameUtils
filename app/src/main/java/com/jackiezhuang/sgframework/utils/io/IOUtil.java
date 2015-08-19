@@ -1,4 +1,4 @@
-package com.jackiezhuang.sgframework.utils;
+package com.jackiezhuang.sgframework.utils.io;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -17,17 +17,17 @@ import java.io.UnsupportedEncodingException;
 public class IOUtil {
 
 	/**
-	 * 从输入流中读取字节数组
+	 * 从输入流中读取字节数组,该操作完成后会关闭流
 	 */
 	public static byte[] readBytes(InputStream in) {
 		byte[] result = null;
-		BufferedInputStream bis = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new
+		BufferedInputStream bin = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new
 				BufferedInputStream(in);
 		try {
 			byte[] tempBuf = new byte[1024];
 			int length;
-			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream(bis.available());
-			while ((length = bis.read(tempBuf)) != -1) {
+			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream(bin.available());
+			while ((length = bin.read(tempBuf)) != -1) {
 				byteOutStream.write(tempBuf, 0, length);
 			}
 			byteOutStream.flush();
@@ -36,13 +36,13 @@ public class IOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			closeIO(bis);
+			closeIO(bin, in);
 		}
 		return result;
 	}
 
 	/**
-	 * 从输入流中读取数据并返回指定编码的字符串
+	 * 从输入流中读取数据并返回指定编码的字符串,该操作完成后会关闭流
 	 */
 	public static String readBytes(InputStream in, String charset) {
 		String result = null;
@@ -56,7 +56,7 @@ public class IOUtil {
 
 
 	/**
-	 * 写入字节数组数据到输出流中
+	 * 写入字节数组数据到输出流中,该操作完成后会关闭流
 	 */
 	public static void writeBytes(OutputStream out, byte[] data) {
 		BufferedOutputStream bout = (out instanceof BufferedOutputStream) ? (BufferedOutputStream) out : new
@@ -66,12 +66,12 @@ public class IOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			closeIO(bout);
+			closeIO(bout, out);
 		}
 	}
 
 	/**
-	 * 写入指定编码格式
+	 * 写入指定编码格式,该操作完成后会关闭流
 	 */
 	public static void writeBytes(OutputStream out, String data, String charset) {
 		try {
@@ -81,6 +81,12 @@ public class IOUtil {
 		}
 	}
 
+	/**
+	 * 从输入流读取数据到输出流中,该操作完成后会关闭流
+	 *
+	 * @param in
+	 * @param out
+	 */
 	public static void copy(InputStream in, OutputStream out) {
 		BufferedInputStream bin = null;
 		BufferedOutputStream bout = null;
@@ -97,7 +103,7 @@ public class IOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			closeIO(bin, bout);
+			closeIO(bin, bout, in, out);
 		}
 	}
 

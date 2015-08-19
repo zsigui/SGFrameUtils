@@ -8,7 +8,7 @@ import android.util.Log;
  *
  * Created by zsigui on 15-8-10.
  */
-public class L {
+public final class L {
 	private static boolean sDebuggable = true;
 	// 2.verbose 3.debug 4.info 5.warn 6.error
 	private static int sDebugLevel = L.DEBUG;

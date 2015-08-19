@@ -13,7 +13,7 @@ import java.security.MessageDigest;
  * <p/>
  * Created by zsigui on 15-8-17.
  */
-public class MD5 {
+public final class MD5 {
 	/**
 	 * 生成摘要字节数组
 	 *

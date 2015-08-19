@@ -23,7 +23,7 @@ import javax.crypto.spec.IvParameterSpec;
  * <p/>
  * Created by JackieZhuang on 2015/8/17.
  */
-public class DESede {
+public final class DESede {
 	// 有DES、DESede(3DES)等
 	private static final String DEFAULT_ALGORITHM = "DESede";
 	// 算法/模式(CBC、EBC等)/填充(PKCS5Padding、NoPadding)

@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  * Created by zsigui on 15-8-18.
  */
 @SuppressWarnings("unchecked")
-public class ReflectUtil {
+public final class ReflectUtil {
 
 
 	/**

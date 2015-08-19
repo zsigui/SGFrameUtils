@@ -1,4 +1,4 @@
-package com.jackiezhuang.sgframework.utils;
+package com.jackiezhuang.sgframework.utils.io;
 
 import android.app.Activity;
 import android.content.CursorLoader;
@@ -7,7 +7,10 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
+import com.jackiezhuang.sgframework.utils.CommonUtil;
+import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.chiper.MD5;
+import com.jackiezhuang.sgframework.utils.system.SystemTool;
 
 import java.io.Closeable;
 import java.io.File;
@@ -511,18 +514,18 @@ public class FileUtil {
 	}
 
 	/**
-	 * 递归删除指定文件夹
+	 * 递归删除指定文件或文件夹
 	 *
 	 * @param dirPath
 	 */
-	public static void deleteDir(String dirPath) {
+	public static void delete(String dirPath) {
 		if (CommonUtil.isEmpty(dirPath)) {
 			return;
 		}
 		File dir = new File(dirPath);
 		if (dir.isDirectory()) {
 			for (String filePath : dir.list()) {
-				deleteDir(dirPath);
+				delete(dirPath);
 			}
 		} else {
 			dir.delete();

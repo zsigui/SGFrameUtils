@@ -10,7 +10,7 @@ import java.util.Set;
  * 通用操作工具
  * Created by zsigui on 15-8-17.
  */
-public class CommonUtil {
+public final class CommonUtil {
 
 	private static final String PRE_TAG = CommonUtil.class.getName();
 

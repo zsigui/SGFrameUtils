@@ -6,7 +6,7 @@ import android.telephony.TelephonyManager;
 /**
  * Created by JackieZhuang on 2015/8/18.
  */
-public class TelUtil {
+public final class TelUtil {
 	/**
 	 * 设备ID
 	 */

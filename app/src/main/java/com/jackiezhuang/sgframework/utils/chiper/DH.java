@@ -29,7 +29,7 @@ import javax.crypto.spec.DHParameterSpec;
  * <p/>
  * Created by JackieZhuang on 2015/8/17.
  */
-public class DH {
+public final class DH {
 	/**
 	 * 默认加密算法
 	 */
