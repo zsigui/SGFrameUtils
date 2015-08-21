@@ -5,16 +5,10 @@ package com.jackiezhuang.sgframework.utils.http.bean;
  */
 public class MultiPart extends UploadPart {
 
-	private String contentType;
+
+	private String contentEndcoding;
 	private String fileName;
 
-	public String getContentType() {
-		return contentType;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
 
 	public String getFileName() {
 		return fileName;
@@ -22,5 +16,13 @@ public class MultiPart extends UploadPart {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	public String getContentEndcoding() {
+		return contentEndcoding;
+	}
+
+	public void setContentEndcoding(String contentEndcoding) {
+		this.contentEndcoding = contentEndcoding;
 	}
 }

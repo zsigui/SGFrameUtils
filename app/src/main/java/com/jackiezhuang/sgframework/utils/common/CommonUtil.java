@@ -1,4 +1,6 @@
-package com.jackiezhuang.sgframework.utils;
+package com.jackiezhuang.sgframework.utils.common;
+
+import com.jackiezhuang.sgframework.utils.SGConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -42,9 +44,9 @@ public final class CommonUtil {
 	 * @param bs
 	 * @return
 	 */
-	public static String bytes2Hex(byte... bs) {
+	public static String bytesToHex(byte... bs) {
 		if (isEmpty(bs)) {
-			throw new IllegalArgumentException(PRE_TAG + ".bytes2Hex : param bs(byte...) is null");
+			throw new IllegalArgumentException(PRE_TAG + ".bytesToHex : param bs(byte...) is null");
 		}
 		StringBuilder builder = new StringBuilder();
 		for (byte b : bs) {
@@ -63,9 +65,9 @@ public final class CommonUtil {
 	 * @param hex
 	 * @return
 	 */
-	public static byte[] hex2Bytes(String hex) {
+	public static byte[] hexToBytes(String hex) {
 		if (isEmpty(hex)) {
-			throw new IllegalArgumentException(PRE_TAG + ".hex2Bytes : param hex(String...) is null");
+			throw new IllegalArgumentException(PRE_TAG + ".hexToBytes : param hex(String...) is null");
 		}
 		if (hex.length() % 2 == 1)
 			hex += '0';
@@ -73,7 +75,7 @@ public final class CommonUtil {
 		char[] cs = hex.toLowerCase(Locale.CHINA).toCharArray();
 		for (int i = 0; i < result.length; i++) {
 			int pos = i * 2;
-			result[i] = (byte) (char2Byte(cs[pos]) << 4 | char2Byte(cs[pos + 1]));
+			result[i] = (byte) (charToByte(cs[pos]) << 4 | charToByte(cs[pos + 1]));
 		}
 		return result;
 	}
@@ -84,14 +86,14 @@ public final class CommonUtil {
 	 * @param bs
 	 * @return
 	 */
-	public static String byte2MacStr(byte[] bs) {
+	public static String byteToMacStr(byte[] bs) {
 		if (isEmpty(bs)) {
-			throw new IllegalArgumentException(PRE_TAG + ".byte2MacStr : param bs(byte[]) is null");
+			throw new IllegalArgumentException(PRE_TAG + ".byteToMacStr : param bs(byte[]) is null");
 		}
 		StringBuilder sb = new StringBuilder(bs.length);
 		for (byte b : bs) {
 			sb.append(":");
-			sb.append(bytes2Hex(b));
+			sb.append(bytesToHex(b));
 		}
 		sb.deleteCharAt(0);
 		return sb.toString();
@@ -103,7 +105,7 @@ public final class CommonUtil {
 	 * @param info
 	 * @return
 	 */
-	public static String int2IpStr(int info) {
+	public static String intToIpStr(int info) {
 		return (info & 0xFF) + "." + (info >> 8 & 0xFF) + "." + (info >> 16 & 0xFF) + "." + (info >> 24 & 0xFF);
 	}
 
@@ -113,14 +115,14 @@ public final class CommonUtil {
 	 * @param c
 	 * @return
 	 */
-	public static byte char2Byte(char c) {
+	public static byte charToByte(char c) {
 		return (byte) "0123456789abcdefg".indexOf(c);
 	}
 
 	/**
 	 * 将字节数组转换为指定格式编码的字符串
 	 */
-	public static String toString(byte[] data, String charset) {
+	public static String bytesToStr(byte[] data, String charset) {
 		String result = null;
 		try {
 			result = new String(data, charset);
@@ -133,7 +135,11 @@ public final class CommonUtil {
 	/**
 	 * 将字节数组转换为系统默认格式编码的字符串
 	 */
-	public static String toString(byte[] data) {
-		return toString(data, SGConfig.DEFAULT_SYS_CHARSET);
+	public static String bytesToStr(byte[] data) {
+		return bytesToStr(data, SGConfig.DEFAULT_SYS_CHARSET);
+	}
+
+	public static void copy(Object src, int srcPos, Object dest, int destPos, int length) {
+		System.arraycopy(src, srcPos, dest, destPos, length);
 	}
 }

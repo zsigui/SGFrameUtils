@@ -1,5 +1,7 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
@@ -7,7 +9,7 @@ import java.net.HttpURLConnection;
  * 请求接口
  * @author zsigui
  */
-public interface IHttpRequest {
+public interface IHttpAction<T> {
 	/**
 	 * 进行connect()连接之前执行的操作,用于配置请求连接的参数,包括请求方法
 	 *
@@ -24,4 +26,6 @@ public interface IHttpRequest {
 	 * @throws IOException
 	 */
 	public void afterConnect(HttpURLConnection urlConnection) throws IOException;
+
+	public T onResponse(HttpResponse response);
 }

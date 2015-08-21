@@ -1,23 +1,24 @@
 package com.jackiezhuang.sgframework.utils.http;
 
-import com.jackiezhuang.sgframework.utils.CommonUtil;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- * 默认{@link IHttpRequest}实现类,完成基本的默认设置,可在此基础上重写
+ * 默认{@link IHttpAction}实现类,完成基本的默认设置,可在此基础上重写
  * <p/>
  * Created by zsigui on 15-8-19.
  */
-public class DefaultHttpRequest implements IHttpRequest {
+public class DefaultHttpAction implements IHttpAction {
 
 	String method = HttpParam.METHOD_GET;
 
 	/**
 	 * HTTP请求构造器,默认请求方法{@link HttpParam#METHOD_GET}
 	 */
-	public DefaultHttpRequest() {
+	public DefaultHttpAction() {
 	}
 
 	/**
@@ -28,7 +29,7 @@ public class DefaultHttpRequest implements IHttpRequest {
 	 * @see HttpParam#METHOD_PUT
 	 * @see HttpParam#METHOD_DELETE
 	 */
-	public DefaultHttpRequest(String method) {
+	public DefaultHttpAction(String method) {
 		setMethod(method);
 	}
 
@@ -59,6 +60,7 @@ public class DefaultHttpRequest implements IHttpRequest {
 		}
 		urlConnection.setDoInput(true);
 		urlConnection.setDefaultUseCaches(false);
+		urlConnection.setRequestMethod(method);
 		// 设置请求头参数
 		urlConnection.setRequestProperty(HttpParam.PROP_CONNECTION, "Keep-Alive");
 		urlConnection.setRequestProperty(HttpParam.PROP_ACCEPT_ENCODING, "gzip, deflate");
@@ -69,4 +71,10 @@ public class DefaultHttpRequest implements IHttpRequest {
 	public void afterConnect(HttpURLConnection urlConnection) throws IOException {
 
 	}
+
+	@Override
+	public Object onResponse(HttpResponse response) {
+		return response;
+	}
+
 }

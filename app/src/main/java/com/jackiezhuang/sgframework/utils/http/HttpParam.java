@@ -10,6 +10,9 @@ public final class HttpParam {
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
+	public static final String METHOD_OPTIONS = "OPTIONS";
+	public static final String METHOD_HEAD = "HEAD";
+	public static final String METHOD_TRACE = "TRACE";
 
 	// 请求和读写超时默认时间
 	public static final int TIMEOUT_CONN_DEFAULT = 5 * 1000;

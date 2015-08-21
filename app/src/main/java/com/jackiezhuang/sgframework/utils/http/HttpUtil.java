@@ -1,13 +1,15 @@
 package com.jackiezhuang.sgframework.utils.http;
 
-import com.jackiezhuang.sgframework.utils.CommonUtil;
-import com.jackiezhuang.sgframework.utils.io.IOUtil;
 import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.SGConfig;
+import com.jackiezhuang.sgframework.utils.StringUtil;
+import com.jackiezhuang.sgframework.utils.T;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
+import com.jackiezhuang.sgframework.utils.io.IOUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -16,10 +18,10 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Created by zsigui on 15-8-11.
+ * Created by zsigui on 15-8-21.
  */
-public final class HttpUtil {
-	private static final String PRE_TAG = HttpUtil.class.getName();
+public class HttpUtil {
+	private static final String PRE_TAG = HttpUtil_old.class.getName();
 
 	private static int sConnTimeout = HttpParam.TIMEOUT_CONN_DEFAULT;
 	private static int sReadTimeout = HttpParam.TIMEOUT_READ_DEFAULT;
@@ -42,11 +44,34 @@ public final class HttpUtil {
 	}
 
 	/**
-	 * 构造发送的正文参数字符串
+	 * 从给定contentType和返回HTML正文中解析出编码,如果解析不出则使用默认编码
+	 */
+	private static String parseCharset(String contentType, byte[] bodyContent, String defaultCharset) {
+		String result = defaultCharset;
+		try {
+			int index = contentType.indexOf("charset=");
+			if (index != -1)
+				result = contentType.substring(index + 8).toUpperCase();
+			else {
+				byte[] tmp = new byte[bodyContent.length >= 4096 ? 1024 : bodyContent.length / 4];
+				CommonUtil.copy(bodyContent, 0, tmp, 0, tmp.length);
+				result = StringUtil.findMatch(CommonUtil.bytesToStr(tmp),
+						"<meta[\\s\\S]*?Content-Type[\\s\\S]*?charset=([\\S]*?)\"[\\s]*?>", 1, defaultCharset);
+			}
+		} catch (IndexOutOfBoundsException e) {
+		}
+		if (CommonUtil.isEmpty(result)) {
+			result = defaultCharset;
+		}
+		return result;
+	}
+
+	/**
+	 * 构造发送的正文键值格式参数字符串
 	 *
 	 * @param data 键值参数
 	 */
-	public static String constructParams(final Map<String, String> data) {
+	public static String createKeyValString(final Map<String, String> data) {
 		final StringBuilder result = new StringBuilder();
 		try {
 			if (data != null && data.size() > 0) {
@@ -70,7 +95,7 @@ public final class HttpUtil {
 	 * @param requestUrl
 	 * @return
 	 */
-	public static String fixUrl(String requestUrl) {
+	public static String addUrlHead(String requestUrl) {
 		String realUrl = requestUrl;
 		if (!realUrl.startsWith("http://")) {
 			realUrl = "http://" + realUrl;
@@ -81,8 +106,8 @@ public final class HttpUtil {
 	/**
 	 * 构造进行Get操作的Url字符串
 	 */
-	public static String createGetUrl(String reqUrl, String params) {
-		String realUrl = fixUrl(reqUrl);
+	public static String createUrl(String reqUrl, String params) {
+		String realUrl = addUrlHead(reqUrl);
 		if (!CommonUtil.isEmpty(params)) {
 			int index = realUrl.lastIndexOf('?');
 			if (index == realUrl.length() - 1) {
@@ -105,7 +130,7 @@ public final class HttpUtil {
 	/**
 	 * HttpUrlConnection对象的默认配置流程
 	 */
-	private static void defaultConfig(IHttpRequest requestOp, HttpURLConnection urlConnection) throws IOException {
+	private static void defaultConfig(IHttpAction requestOp, HttpURLConnection urlConnection) throws IOException {
 		// 此部分进行默认设置,可以在IRequest回调函数中进行重配
 		urlConnection.setRequestMethod(HttpParam.METHOD_GET);
 		urlConnection.setDoInput(true);
@@ -119,22 +144,28 @@ public final class HttpUtil {
 		requestOp.afterConnect(urlConnection);
 	}
 
+	public static boolean isGzipStream(final HttpURLConnection urlConnection) {
+		String encoding = urlConnection.getContentEncoding();
+		return encoding != null && encoding.contains("gzip");
+	}
+
+
 	/**
 	 * 执行Http请求并返回字节数组结果
-	 * <p>需要在{@link IHttpRequest}的beforeRequest方法设置Http请求类型<p/>
+	 * <p>需要在{@link IHttpAction}的beforeRequest方法设置Http请求类型<p/>
 	 * <p>默认为GET请求<p/>
 	 */
-	public static byte[] requestForBytesResponse(String requestUrl, IHttpRequest requestOp) {
+	public static T requestForBytesResponse(String requestUrl, IHttpAction<T> requestOp) {
 
 		if (CommonUtil.isEmpty(requestUrl)) {
 			throw new IllegalArgumentException(PRE_TAG + ".requestForBytesResponse : param requestUrl(String) is " +
 					"null");
 		}
 		if (CommonUtil.isEmpty(requestOp)) {
-			requestOp = new DefaultHttpRequest();
+			requestOp = new DefaultHttpAction();
 		}
 
-		byte[] result = null;
+		T result = null;
 		HttpURLConnection urlConnection = null;
 		try {
 			URL url = new URL(requestUrl);
@@ -143,16 +174,26 @@ public final class HttpUtil {
 			// 此部分进行默认设置,可以在IRequest回调函数中进行重配
 			defaultConfig(requestOp, urlConnection);
 
-			if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+			int statusCode = urlConnection.getResponseCode();
+			if (statusCode == HttpURLConnection.HTTP_MOVED_PERM ||
+					statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+				// 301/302 重定向地址,解析地址重新请求
 
-				String encoding = urlConnection.getContentEncoding();
+			} else if (statusCode == HttpURLConnection.HTTP_NOT_MODIFIED){
+				// 304 使用缓存
+
+			} else if (statusCode == HttpURLConnection.HTTP_OK) {
+				// 200 请求成功
 				InputStream in = urlConnection.getInputStream();
-				if (encoding != null && encoding.contains("gzip")) {
+				if (isGzipStream(urlConnection)) {
 					// 使用Gzip流方式进行读取
 					in = new GZIPInputStream(in);
 				}
-				result = IOUtil.readBytes(in);
+				byte[] data = IOUtil.readBytes(in);
+
 			} else {
+				// 其它返回码,错误
+
 				L.i(PRE_TAG, "requestForBytesResponse return failed : code = " + urlConnection.getResponseCode() +
 						", msg = " + urlConnection.getResponseMessage());
 			}
@@ -162,328 +203,6 @@ public final class HttpUtil {
 			if (urlConnection != null)
 				urlConnection.disconnect();
 		}
-		return result;
+		return requestOp.onResponse(new HttpResponse());
 	}
-
-	/**
-	 * 进行Http的Get或Delete操作
-	 *
-	 * @param requestUrl  请求进行Get或Delete的Url字符串
-	 * @param requestData Get或Delete参数,用户需要使用UTF-8进行UrlEncode,null或""表示不传
-	 * @param method      GET或DELETE字符串方法名
-	 */
-	private static byte[] doGetOrDelete(final String requestUrl, String requestData, String method) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doGet : param requestUrl(String) is null");
-		}
-		String realUrl = createGetUrl(requestUrl, requestData);
-		byte[] result = requestForBytesResponse(realUrl, new DefaultHttpRequest(method) {
-
-			@Override
-			public void afterConnect(HttpURLConnection urlConnection) throws IOException {
-
-				// 获取Charset
-				String contentType = urlConnection.getContentType();
-				String charset = SGConfig.DEFAULT_UTF_CHARSET;
-				try {
-					charset = contentType.substring(contentType.indexOf("charset=") + 8).toUpperCase();
-				} catch (IndexOutOfBoundsException e) {
-				}
-				synchronized (mapLock) {
-					charsetMap.put(requestUrl, charset);
-				}
-			}
-		});
-		return result;
-	}
-
-	/**
-	 * 进行Http的Get或Delete操作
-	 *
-	 * @param requestUrl  请求进行Get或Delete的Url字符串
-	 * @param requestData Get或Delete参数,用户需要使用UTF-8进行UrlEncode,null或""表示不传
-	 * @param method      GET或DELETE字符串方法名
-	 */
-	private static String doGetOrDeleteString(String requestUrl, String requestData, String method) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doGetString : param requestUrl(String) is null");
-		}
-		String result = null;
-		try {
-			byte[] temp = doGetOrDelete(requestUrl, requestData, method);
-			String charset = charsetMap.get(requestUrl);
-			synchronized (mapLock) {
-				charsetMap.remove(requestUrl);
-			}
-			result = new String(temp, charset);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-	/**
-	 * 进行Http的Post或Put操作
-	 *
-	 * @param requestUrl  请求执行Post或Put地址
-	 * @param requestData Post或Put参数,无则传null
-	 * @param method      POST或PUT字符串方法名
-	 */
-	private static byte[] doPostOrPut(final String requestUrl, Map<String, String> requestData, String method) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doPost : param requestUrl(String) is null");
-		}
-		final String paramStr = constructParams(requestData);
-		String realUrl = createGetUrl(requestUrl, null);
-		byte[] result = requestForBytesResponse(realUrl, new DefaultHttpRequest(method) {
-			@Override
-			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
-				if (!CommonUtil.isEmpty(paramStr)) {
-					// 此部分设置传参数或上传文件
-					urlConnection.setDoOutput(true);
-					//urlConnection.setChunkedStreamingMode(0);   // 未知文件大小
-					urlConnection.setFixedLengthStreamingMode(paramStr.length()); //已知文件大小
-				}
-			}
-
-			@Override
-			public void afterConnect(HttpURLConnection urlConnection) throws IOException {
-				// 获取Charset
-				String contentType = urlConnection.getContentType();
-				String charset = SGConfig.DEFAULT_UTF_CHARSET;
-				try {
-					charset = contentType.substring(contentType.indexOf("charset=") + 8).toUpperCase();
-				} catch (IndexOutOfBoundsException e) {
-				}
-				synchronized (mapLock) {
-					charsetMap.put(requestUrl, charset);
-				}
-
-				// post表单
-				if (CommonUtil.isEmpty(paramStr)) {
-					return;
-				}
-				IOUtil.writeBytes(urlConnection.getOutputStream(), paramStr, SGConfig.DEFAULT_SYS_CHARSET);
-			}
-		});
-		return result;
-	}
-
-	/**
-	 * 进行Http的Post或Put操作
-	 *
-	 * @param requestUrl  请求执行Post或Put地址
-	 * @param requestData Post或Put参数,无则传null
-	 * @param method      POST或PUT字符串方法名
-	 */
-	private static String doPostOrPutString(String requestUrl, Map<String, String> requestData, String method) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doPost : param requestUrl(String) is null");
-		}
-		String result = null;
-		try {
-			byte[] temp = doPostOrPut(requestUrl, requestData, method);
-			String charset = charsetMap.get(requestUrl);
-			synchronized (mapLock) {
-				charsetMap.remove(requestUrl);
-			}
-			result = new String(temp, charset);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-
-	public static byte[] doPostMultipart(final String requestUrl, final Map<String, Object> requestData, String method) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doPost : param requestUrl(String) is null");
-		}
-		String realUrl = createGetUrl(requestUrl, null);
-		byte[] result = requestForBytesResponse(realUrl, new DefaultHttpRequest(method) {
-			@Override
-			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
-				if (!CommonUtil.isEmpty(requestData)) {
-					// 此部分设置传参数或上传文件
-					urlConnection.setDoOutput(true);
-					urlConnection.setChunkedStreamingMode(0);   // 未知文件大小
-					urlConnection.setRequestProperty(HttpParam.PROP_CONTENT_TYPE, "multipart/form-data; boundary = " + BOUNDARY);
-					urlConnection.setRequestProperty(HttpParam.PROP_CACHE_CONTROL, "no-cache");
-				}
-			}
-
-			@Override
-			public void afterConnect(HttpURLConnection urlConnection) throws IOException {
-				// 获取Charset
-				String contentType = urlConnection.getContentType();
-				String charset = SGConfig.DEFAULT_UTF_CHARSET;
-				try {
-					charset = contentType.substring(contentType.indexOf("charset=") + 8).toUpperCase();
-				} catch (IndexOutOfBoundsException e) {
-				}
-				synchronized (mapLock) {
-					charsetMap.put(requestUrl, charset);
-				}
-
-				// post表单
-				if (CommonUtil.isEmpty(requestData)) {
-					return;
-				}
-
-			}
-		});
-		return result;
-	}
-
-	/**
-	 * 进行Http的Get操作
-	 *
-	 * @param requestUrl  请求进行Get的Url字符串
-	 */
-	public static byte[] doGet(String requestUrl) {
-		return doGet(requestUrl, "");
-	}
-
-	/**
-	 * 进行Http的Get操作
-	 *
-	 * @param requestUrl  请求进行Get的Url字符串
-	 * @param requestData get参数,用户需要使用UTF-8进行UrlEncode,""表示不传
-	 */
-	public static byte[] doGet(String requestUrl, String requestData) {
-		return doGetOrDelete(requestUrl, requestData, HttpParam.METHOD_GET);
-	}
-
-	/**
-	 * 进行Http的Delete操作
-	 *
-	 * @param requestUrl  请求进行Delete的Url字符串
-	 */
-	public static byte[] doDelete(String requestUrl) {
-		return doDelete(requestUrl, "");
-	}
-
-	/**
-	 * 进行Http的Delete操作
-	 *
-	 * @param requestUrl  请求进行Delete的Url字符串
-	 * @param requestData Delete参数,用户需要使用UTF-8进行UrlEncode,""表示不传
-	 */
-	public static byte[] doDelete(String requestUrl, String requestData) {
-		return doGetOrDelete(requestUrl, requestData, HttpParam.METHOD_DELETE);
-	}
-
-	/**
-	 * 进行Http的Get操作
-	 *
-	 * @param requestUrl  请求进行Get的Url字符串
-	 * @param requestData get参数,会默认使用UTF-8进行UrlEncode,null表示不传
-	 */
-	public static byte[] doGet(String requestUrl, Map<String, String> requestData) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doGet : param requestUrl(String) is null");
-		}
-		return doGet(requestUrl, constructParams(requestData));
-	}
-
-	/**
-	 * 进行Http的Delete操作
-	 *
-	 * @param requestUrl  请求进行Delete的Url字符串
-	 * @param requestData Delete参数,用户需要使用UTF-8进行UrlEncode,""表示不传
-	 */
-	public static byte[] doDelete(String requestUrl, Map<String, String> requestData) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doGet : param requestUrl(String) is null");
-		}
-		return doDelete(requestUrl, constructParams(requestData));
-	}
-
-	/**
-	 * 进行Http的Get操作
-	 *
-	 * @param requestUrl  请求进行Get的Url字符串
-	 * @param requestData get参数,用户需要使用UTF-8进行UrlEncode,null表示不传
-	 */
-	public static String doGetString(String requestUrl, String requestData) {
-		return doGetOrDeleteString(requestUrl, requestData, HttpParam.METHOD_GET);
-	}
-
-	/**
-	 * 进行Http的Delete操作
-	 *
-	 * @param requestUrl  请求进行Delete的Url字符串
-	 * @param requestData delete参数,用户需要使用UTF-8进行UrlEncode,""表示不传
-	 */
-	public static String doDeleteString(String requestUrl, String requestData) {
-		return doGetOrDeleteString(requestUrl, requestData, HttpParam.METHOD_POST);
-	}
-
-	/**
-	 * 进行Http的Get操作
-	 *
-	 * @param requestUrl  请求进行Get的Url字符串
-	 * @param requestData get参数,会默认使用UTF-8进行UrlEncode,null表示不传
-	 */
-	public static String doGetString(String requestUrl, Map<String, String> requestData) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doGeString : param requestUrl(String) is null");
-		}
-		return doGetString(requestUrl, constructParams(requestData));
-	}
-
-	/**
-	 * 进行Http的Delete操作
-	 *
-	 * @param requestUrl  请求进行Delete的Url字符串
-	 * @param requestData Delete参数,会默认使用UTF-8进行UrlEncode,null表示不传
-	 */
-	public static String doDeleteString(String requestUrl, Map<String, String> requestData) {
-		if (CommonUtil.isEmpty(requestUrl)) {
-			throw new IllegalArgumentException(PRE_TAG + ".doGeString : param requestUrl(String) is null");
-		}
-		return doDeleteString(requestUrl, constructParams(requestData));
-	}
-
-	/**
-	 * 进行Http的Post操作
-	 *
-	 * @param requestUrl  请求执行Post地址
-	 * @param requestData Post参数,无则传null
-	 */
-	public static byte[] doPost(String requestUrl, Map<String, String> requestData) {
-		return doPostOrPut(requestUrl, requestData, HttpParam.METHOD_POST);
-	}
-
-	/**
-	 * 进行Http的Put操作
-	 *
-	 * @param requestUrl  请求执行Put地址
-	 * @param requestData Put参数,无则传null
-	 */
-	public static byte[] doPut(String requestUrl, Map<String, String> requestData) {
-		return doPostOrPut(requestUrl, requestData, HttpParam.METHOD_PUT);
-	}
-
-	/**
-	 * 进行Http的Post操作
-	 *
-	 * @param requestUrl  请求执行Post地址
-	 * @param requestData Post参数,无则传null
-	 */
-	public static String doPostString(String requestUrl, Map<String, String> requestData) {
-		return doPostOrPutString(requestUrl, requestData, HttpParam.METHOD_POST);
-	}
-
-	/**
-	 * 进行Http的Put操作
-	 *
-	 * @param requestUrl  请求执行Put地址
-	 * @param requestData Put参数,无则传null
-	 */
-	public static String doPutString(String requestUrl, Map<String, String> requestData) {
-		return doPostOrPutString(requestUrl, requestData, HttpParam.METHOD_PUT);
-	}
-
-
 }

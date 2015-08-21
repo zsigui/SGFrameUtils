@@ -1,8 +1,10 @@
 package com.jackiezhuang.sgframework.utils.io;
 
+import com.jackiezhuang.sgframework.utils.common.ByteArrayPool;
+import com.jackiezhuang.sgframework.utils.common.PoolByteArrayOutputStream;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,10 +25,11 @@ public class IOUtil {
 		byte[] result = null;
 		BufferedInputStream bin = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new
 				BufferedInputStream(in);
+		byte[] tempBuf = null;
 		try {
-			byte[] tempBuf = new byte[1024];
+			tempBuf = ByteArrayPool.init().obtain(1024);
 			int length;
-			ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream(bin.available());
+			PoolByteArrayOutputStream byteOutStream = new PoolByteArrayOutputStream(bin.available());
 			while ((length = bin.read(tempBuf)) != -1) {
 				byteOutStream.write(tempBuf, 0, length);
 			}
@@ -36,6 +39,7 @@ public class IOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
+			ByteArrayPool.init().add(tempBuf);
 			closeIO(bin, in);
 		}
 		return result;
@@ -90,11 +94,12 @@ public class IOUtil {
 	public static void copy(InputStream in, OutputStream out) {
 		BufferedInputStream bin = null;
 		BufferedOutputStream bout = null;
+		byte[] bs = null;
 		try {
 			bin = (in instanceof BufferedInputStream) ? (BufferedInputStream) in : new BufferedInputStream(in);
 			bout = (out instanceof BufferedOutputStream) ? (BufferedOutputStream) out : new BufferedOutputStream
 					(out);
-			byte[] bs = new byte[1024];
+			bs = ByteArrayPool.init().obtain(1024);
 			int length;
 			while ((length = bin.read(bs, 0, bs.length)) != -1) {
 				bout.write(bs, 0, length);
@@ -103,6 +108,7 @@ public class IOUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
+			ByteArrayPool.init().add(bs);
 			closeIO(bin, bout, in, out);
 		}
 	}

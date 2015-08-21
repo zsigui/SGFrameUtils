@@ -2,7 +2,7 @@ package com.jackiezhuang.sgframework.utils.chiper;
 
 import android.util.Base64;
 
-import com.jackiezhuang.sgframework.utils.CommonUtil;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.SGConfig;
 
 import java.io.UnsupportedEncodingException;
@@ -138,7 +138,7 @@ public final class DESede {
 	                                  String charset) {
 		String result = null;
 		try {
-			result = CommonUtil.bytes2Hex(encrypt(msg.getBytes(charset),
+			result = CommonUtil.bytesToHex(encrypt(msg.getBytes(charset),
 					genKeyByte(key.getBytes(charset), DEFAULT_KEY_SIZE),
 					genKeyByte(iv.getBytes(charset), DEFAULT_IV_SIZE)));
 		} catch (UnsupportedEncodingException e) {
@@ -270,7 +270,7 @@ public final class DESede {
 	                                  String charset) {
 		String result = null;
 		try {
-			result = decrypt(CommonUtil.hex2Bytes(msg),
+			result = decrypt(CommonUtil.hexToBytes(msg),
 					genKeyByte(key.getBytes(charset), DEFAULT_KEY_SIZE),
 					genKeyByte(iv.getBytes(charset), DEFAULT_IV_SIZE));
 		} catch (Exception e) {

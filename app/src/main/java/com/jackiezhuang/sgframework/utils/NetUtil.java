@@ -7,7 +7,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
-import com.jackiezhuang.sgframework.utils.http.HttpUtil;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.HttpUtil_old;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
@@ -182,7 +183,7 @@ public final class NetUtil {
 		String result = null;
 		try {
 			NetworkInterface ni = NetworkInterface.getByInetAddress(InetAddress.getByName(getLocalHostIp()));
-			result = CommonUtil.byte2MacStr(ni.getHardwareAddress());
+			result = CommonUtil.byteToMacStr(ni.getHardwareAddress());
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -214,7 +215,7 @@ public final class NetUtil {
 		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		if (wifiManager != null) {
 			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-			return CommonUtil.int2IpStr(wifiInfo.getIpAddress());
+			return CommonUtil.intToIpStr(wifiInfo.getIpAddress());
 		}
 		return null;
 	}
@@ -248,7 +249,7 @@ public final class NetUtil {
 			url = "http://www.baidu.com";
 		}
 		boolean result = false;
-		byte[] tmp = HttpUtil.doGet(url);
+		byte[] tmp = HttpUtil_old.doGet(url);
 		if (!CommonUtil.isEmpty(tmp)) {
 			result = true;
 		}

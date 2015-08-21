@@ -2,7 +2,7 @@ package com.jackiezhuang.sgframework.utils.chiper;
 
 import android.util.Base64;
 
-import com.jackiezhuang.sgframework.utils.CommonUtil;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.SGConfig;
 
 import java.io.UnsupportedEncodingException;
@@ -66,7 +66,7 @@ public final class MD5 {
 	 * @return 十六进制格式的字符串
 	 */
 	public static String digestInHex(byte[] content) {
-		return CommonUtil.bytes2Hex(genDigest(content));
+		return CommonUtil.bytesToHex(genDigest(content));
 	}
 
 	/**
@@ -87,7 +87,7 @@ public final class MD5 {
 	 * @return 十六进制格式的字符串
 	 */
 	public static String digestInHex(String content, String charset) {
-		return CommonUtil.bytes2Hex(genDigest(content, charset));
+		return CommonUtil.bytesToHex(genDigest(content, charset));
 	}
 
 	/**

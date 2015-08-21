@@ -7,6 +7,7 @@ public abstract class UploadPart {
 
 	private String name;
 	private String val;
+	private String contentType;
 
 	public String getName() {
 		return name;
@@ -22,5 +23,13 @@ public abstract class UploadPart {
 
 	public void setVal(String val) {
 		this.val = val;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 }

@@ -2,8 +2,8 @@ package com.jackiezhuang.sgframework.utils.chiper;
 
 import android.util.Base64;
 
-import com.jackiezhuang.sgframework.utils.CommonUtil;
 import com.jackiezhuang.sgframework.utils.SGConfig;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -20,7 +20,6 @@ import java.security.spec.X509EncodedKeySpec;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
-import javax.crypto.interfaces.DHPrivateKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 
@@ -148,8 +147,8 @@ public final class DH {
 	 */
 	public static String[] genAKeysInHex(int initSize) {
 		byte[][] key = genAKeys(initSize);
-		return new String[]{CommonUtil.bytes2Hex(key[0]),
-				CommonUtil.bytes2Hex(key[1])};
+		return new String[]{CommonUtil.bytesToHex(key[0]),
+				CommonUtil.bytesToHex(key[1])};
 	}
 
 	/**
@@ -184,8 +183,8 @@ public final class DH {
 			// 注意点：以下Key用getEncoded方法转为byte数组之前需要先显示转换为DHKey类型才行,
 			// 否则后面另一方以该公玥进行再构建会出现定义错误
 			result = new byte[][]{
-					((DHPrivateKey) keyPair.getPrivate()).getEncoded(),
-					((DHPublicKey) keyPair.getPublic()).getEncoded()};
+					keyPair.getPrivate().getEncoded(),
+					keyPair.getPublic().getEncoded()};
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (InvalidKeySpecException e) {
@@ -228,9 +227,9 @@ public final class DH {
 	 * @return 字符串数组，0下标为私钥，1下标为公玥
 	 */
 	public static String[] genBKeysInHex(String ApubKey) {
-		byte[][] keys = genBKeys(CommonUtil.hex2Bytes(ApubKey));
-		return new String[]{CommonUtil.bytes2Hex(keys[0]),
-				CommonUtil.bytes2Hex(keys[1])};
+		byte[][] keys = genBKeys(CommonUtil.hexToBytes(ApubKey));
+		return new String[]{CommonUtil.bytesToHex(keys[0]),
+				CommonUtil.bytesToHex(keys[1])};
 	}
 
 	/**
@@ -241,8 +240,8 @@ public final class DH {
 	 */
 	public static String[] genBKeysInHex(byte[] ApubKey) {
 		byte[][] keys = genBKeys(ApubKey);
-		return new String[]{CommonUtil.bytes2Hex(keys[0]),
-				CommonUtil.bytes2Hex(keys[1])};
+		return new String[]{CommonUtil.bytesToHex(keys[0]),
+				CommonUtil.bytesToHex(keys[1])};
 	}
 
 	/**
@@ -304,8 +303,8 @@ public final class DH {
 	                                  String BprvKey, String charset) {
 		String result = null;
 		try {
-			result = CommonUtil.bytes2Hex(encrypt(data.getBytes(charset),
-					CommonUtil.hex2Bytes(ApubKey), CommonUtil.hex2Bytes(BprvKey)));
+			result = CommonUtil.bytesToHex(encrypt(data.getBytes(charset),
+					CommonUtil.hexToBytes(ApubKey), CommonUtil.hexToBytes(BprvKey)));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -384,8 +383,8 @@ public final class DH {
 	                                  String AprvKey, String charset) {
 		String result = null;
 		try {
-			result = new String(decrypt(CommonUtil.hex2Bytes(data),
-					CommonUtil.hex2Bytes(BpubKey), CommonUtil.hex2Bytes(AprvKey)), charset);
+			result = new String(decrypt(CommonUtil.hexToBytes(data),
+					CommonUtil.hexToBytes(BpubKey), CommonUtil.hexToBytes(AprvKey)), charset);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

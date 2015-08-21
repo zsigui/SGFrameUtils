@@ -7,7 +7,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
-import com.jackiezhuang.sgframework.utils.CommonUtil;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.chiper.MD5;
 import com.jackiezhuang.sgframework.utils.system.SystemTool;
@@ -601,7 +601,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static String getMD5String(String filePath) {
-		return CommonUtil.bytes2Hex(getMD5Bytes(filePath));
+		return CommonUtil.bytesToHex(getMD5Bytes(filePath));
 	}
 
 	/**
