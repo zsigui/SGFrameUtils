@@ -627,6 +627,10 @@ public class FileUtil {
 		return result;
 	}
 
+	public static String getAbsolutePath(String path) {
+		return new File(path).getAbsolutePath();
+	}
+
 	/* --------------------- 以下部分仅适用于Android下开发 --------------------- */
 
 	/**
