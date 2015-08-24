@@ -5,6 +5,8 @@ import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.MultiPart;
 import com.jackiezhuang.sgframework.utils.http.bean.TextPart;
+import com.jackiezhuang.sgframework.utils.http.impl.DefaultHttpAction;
+import com.jackiezhuang.sgframework.utils.http.itfc.IHttpAction;
 import com.jackiezhuang.sgframework.utils.io.IOUtil;
 
 import java.io.DataOutputStream;

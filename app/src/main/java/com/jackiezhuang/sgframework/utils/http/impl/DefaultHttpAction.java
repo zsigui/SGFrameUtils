@@ -1,13 +1,15 @@
-package com.jackiezhuang.sgframework.utils.http;
+package com.jackiezhuang.sgframework.utils.http.impl;
 
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.HttpParam;
+import com.jackiezhuang.sgframework.utils.http.itfc.IHttpAction;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- * 默认{@link IHttpAction}实现类,完成基本的默认设置,可在此基础上重写
+ * 默认{@link com.jackiezhuang.sgframework.utils.http.itfc.IHttpAction}实现类,完成基本的默认设置,可在此基础上重写
  * <p/>
  * Created by zsigui on 15-8-19.
  */

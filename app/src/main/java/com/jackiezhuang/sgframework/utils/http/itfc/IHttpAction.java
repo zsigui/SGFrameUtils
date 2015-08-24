@@ -1,4 +1,4 @@
-package com.jackiezhuang.sgframework.utils.http;
+package com.jackiezhuang.sgframework.utils.http.itfc;
 
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
 

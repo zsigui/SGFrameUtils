@@ -6,6 +6,8 @@ import com.jackiezhuang.sgframework.utils.StringUtil;
 import com.jackiezhuang.sgframework.utils.T;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
+import com.jackiezhuang.sgframework.utils.http.impl.DefaultHttpAction;
+import com.jackiezhuang.sgframework.utils.http.itfc.IHttpAction;
 import com.jackiezhuang.sgframework.utils.io.IOUtil;
 
 import java.io.IOException;
