@@ -77,6 +77,11 @@ public class FormRequest extends HttpRequest {
 	}
 
 	@Override
+	public Priority getPriority() {
+		return Priority.NORMAL;
+	}
+
+	@Override
 	public String getContentType() {
 		return "application/x-www-form-urlencoded; charset=UTF-8";
 	}

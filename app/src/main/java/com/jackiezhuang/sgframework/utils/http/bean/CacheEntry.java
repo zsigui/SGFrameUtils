@@ -1,5 +1,7 @@
 package com.jackiezhuang.sgframework.utils.http.bean;
 
+import java.util.Map;
+
 /**
  * Created by zsigui on 15-8-24.
  */
@@ -9,15 +11,18 @@ public class CacheEntry {
 	private long mExpireTime;
 	private long mServerTime;
 	private long mLastModifiedTime;
+	private Map<String, String> mResponseHeaders;
 	private byte[] mData;
 
 	public CacheEntry() {}
 
-	public CacheEntry(CacheHeader header) {
+	public CacheEntry(CacheHeader header, byte[] data) {
 		mEtag = header.getEtag();
 		mExpireTime = header.getExpireTime();
 		mServerTime = header.getServerTime();
 		mLastModifiedTime = header.getLastModifiedTime();
+		mData = data;
+		mResponseHeaders = header.getResponseheaders();
 	}
 
 	public byte[] getData() {
@@ -58,5 +63,13 @@ public class CacheEntry {
 
 	public void setLastModifiedTime(long lastModifiedTime) {
 		mLastModifiedTime = lastModifiedTime;
+	}
+
+	public Map<String, String> getResponseHeaders() {
+		return mResponseHeaders;
+	}
+
+	public void setResponseHeaders(Map<String, String> responseHeaders) {
+		this.mResponseHeaders = responseHeaders;
 	}
 }

@@ -25,6 +25,11 @@ public class JsonRequest extends HttpRequest {
 	}
 
 	@Override
+	public Priority getPriority() {
+		return Priority.NORMAL;
+	}
+
+	@Override
 	public String getContentType() {
 		return "application/json";
 	}

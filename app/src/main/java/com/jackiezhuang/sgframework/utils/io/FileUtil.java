@@ -7,9 +7,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
-import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.chiper.MD5;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.system.SystemTool;
 
 import java.io.Closeable;
@@ -485,38 +485,50 @@ public class FileUtil {
 
 	/**
 	 * 创建指定路径文件夹
-	 *
-	 * @param dirPath
 	 */
 	public static void mkdirs(String dirPath) {
 		if (CommonUtil.isEmpty(dirPath)) {
 			return;
 		}
-		File file = new File(dirPath);
-		if (!file.exists() || !file.isDirectory()) {
-			mkdirs(dirPath);
+		mkdirs(new File(dirPath));
+	}
+
+	/**
+	 * 创建指定路径文件夹
+	 */
+	public static void mkdirs(File dir) {
+		if (CommonUtil.isEmpty(dir)) {
+			return;
+		}
+		if (!dir.exists() || !dir.isDirectory()) {
+			dir.mkdirs();
 		}
 	}
 
 	/**
 	 * 创建指定路径的父路径
-	 *
-	 * @param childPath
 	 */
 	public static void mkParentDirs(String childPath) {
 		if (CommonUtil.isEmpty(childPath)) {
 			return;
 		}
-		File file = new File(childPath);
-		if (file.getParentFile() != null) {
-			mkdirs(file.getParent());
+		mkParentDirs(new File(childPath));
+	}
+
+	/**
+	 * 创建指定路径的父路径
+	 */
+	public static void mkParentDirs(File childFile) {
+		if (CommonUtil.isEmpty(childFile)) {
+			return;
+		}
+		if (childFile.getParentFile() != null) {
+			mkdirs(childFile.getParent());
 		}
 	}
 
 	/**
 	 * 递归删除指定文件或文件夹
-	 *
-	 * @param dirPath
 	 */
 	public static void delete(String dirPath) {
 		if (CommonUtil.isEmpty(dirPath)) {
@@ -525,7 +537,23 @@ public class FileUtil {
 		File dir = new File(dirPath);
 		if (dir.isDirectory()) {
 			for (String filePath : dir.list()) {
-				delete(dirPath);
+				delete(filePath);
+			}
+		} else {
+			dir.delete();
+		}
+	}
+
+	/**
+	 * 递归删除指定文件或文件夹
+	 */
+	public static void delete(File dir) {
+		if (CommonUtil.isEmpty(dir)) {
+			return;
+		}
+		if (dir.isDirectory()) {
+			for (File file : dir.listFiles()) {
+				delete(file);
 			}
 		} else {
 			dir.delete();
@@ -588,7 +616,7 @@ public class FileUtil {
 	 * @return
 	 */
 	public static byte[] getMD5Bytes(String filePath) {
-		if (CommonUtil.isEmpty(filePath)){
+		if (CommonUtil.isEmpty(filePath)) {
 			throw new IllegalArgumentException(PRE_TAG + ".getMD5Val : params filePath(String) is null");
 		}
 		return MD5.genDigest(readBytes(filePath));
@@ -618,7 +646,7 @@ public class FileUtil {
 			return false;
 		}
 		boolean result = true;
-		for (int i = 0; i<aBytes.length; i++) {
+		for (int i = 0; i < aBytes.length; i++) {
 			if (aBytes[i] != bBytes[i]) {
 				result = false;
 				break;
@@ -627,8 +655,41 @@ public class FileUtil {
 		return result;
 	}
 
+	/**
+	 * 获取指定路径文件的绝对路径
+	 */
 	public static String getAbsolutePath(String path) {
 		return new File(path).getAbsolutePath();
+	}
+
+	/**
+	 * 判断指定路径是否指示一个文件或文件夹
+	 */
+	public static boolean isFileOrDir(String path, boolean isFile) {
+		File file = new File(path);
+		return file.exists() && (isFile ? file.isFile() : file.isDirectory());
+	}
+
+	/**
+	 * 判断指定路径是否指示一个文件或文件夹
+	 */
+	public static boolean isFileOrDir(File file, boolean isFile) {
+		return file.exists() && (isFile ? file.isFile() : file.isDirectory());
+	}
+
+	/**
+	 * 判断指定路径是否指示一个可读写的文件或文件夹
+	 */
+	public static boolean canReadAndWrite(String path, boolean isFile) {
+		File file = new File(path);
+		return file.exists() && (isFile ? file.isFile() : file.isDirectory()) && file.canRead() && file.canWrite();
+	}
+
+	/**
+	 * 判断指定路径是否指示一个可读写的文件或文件夹
+	 */
+	public static boolean canReadAndWrite(File file, boolean isFile) {
+		return file.exists() && (isFile ? file.isFile() : file.isDirectory()) && file.canRead() && file.canWrite();
 	}
 
 	/* --------------------- 以下部分仅适用于Android下开发 --------------------- */

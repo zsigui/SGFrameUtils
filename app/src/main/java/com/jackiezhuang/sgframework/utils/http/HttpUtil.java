@@ -157,7 +157,7 @@ public class HttpUtil {
 	 * <p>需要在{@link IHttpAction}的beforeRequest方法设置Http请求类型<p/>
 	 * <p>默认为GET请求<p/>
 	 */
-	public static T requestForBytesResponse(String requestUrl, IHttpAction<T> requestOp) {
+	public static T requestForBytesResponse(String requestUrl, IHttpAction<byte[]> requestOp) {
 
 		if (CommonUtil.isEmpty(requestUrl)) {
 			throw new IllegalArgumentException(PRE_TAG + ".requestForBytesResponse : param requestUrl(String) is " +
