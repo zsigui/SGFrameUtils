@@ -1,5 +1,6 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.FileRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
@@ -12,6 +13,9 @@ import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
+ * 网络请求调度器，用于从网络请求队列中获取请求，然后执行请求任务，再交由分发器交付UI线程进行结果回调处理
+ *
+ * <p></p>
  * Created by zsigui on 15-8-27.
  */
 public class NetworkDispatcher extends Dispatcher {
@@ -40,6 +44,15 @@ public class NetworkDispatcher extends Dispatcher {
 			}
 
 			HttpResponse response = performRequest(request);
+
+			if (request.shouldCache() && response.isModified()) {
+				// 添加或者更新Cache数据
+
+			}
+
+			if (!CommonUtil.isEmpty(request.getCallback())) {
+				request.getCallback().onFinished(response);
+			}
 		}
 	}
 
@@ -48,7 +61,7 @@ public class NetworkDispatcher extends Dispatcher {
 		HttpUtil.requestForBytesResponse(request.getUrl(), new IHttpAction<byte[]>() {
 			@Override
 			public void beforeConnect(HttpURLConnection urlConnection) throws IOException {
-				urlConnection.setRequestMethod(request.getMethod());
+				urlConnection.setRequestMethod(request.getMethod().val());
 				urlConnection.setDoInput(true);
 				for (Map.Entry<String, String> header : request.getRequestHeaders().entrySet()) {
 					urlConnection.setRequestProperty(header.getKey(), header.getValue());

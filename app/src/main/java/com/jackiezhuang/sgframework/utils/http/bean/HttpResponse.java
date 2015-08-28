@@ -18,6 +18,8 @@ public class HttpResponse {
 	private boolean mIsModified = false;
 	private boolean mIsSuccess = false;
 
+	public HttpResponse(){}
+
 	public HttpResponse(byte[] bodyContent, Map<String, String> headers, String parsedEncoding, int statusCode) {
 		this(bodyContent, headers, parsedEncoding, statusCode, false);
 	}

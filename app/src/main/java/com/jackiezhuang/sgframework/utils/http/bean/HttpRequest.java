@@ -2,6 +2,8 @@ package com.jackiezhuang.sgframework.utils.http.bean;
 
 import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.SGHttpException;
+import com.jackiezhuang.sgframework.utils.http.itfc.ResponseCallback;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,13 +50,46 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	private boolean mShouldCache;
 	private boolean mIsCanceled = false;
 	private CacheEntry mCache;
-	private boolean mDeleyCache;
-	private int mDelayTime;
+	private ResponseCallback mCallback;
 
 	/**
 	 * 请求优先级序列值
 	 */
 	private int mSequence;
+
+	/**
+	 * 修复请求连接地址
+	 * <p></p>
+	 * 正常URL = [协议]://[域名]/[路径]
+	 */
+	private String fixUrl(String url) throws SGHttpException {
+		url = url.trim();
+		if (url.length() < 7) {
+			// 默认添加http://协议头
+			url = "http://" + url;
+		}
+
+		int index = url.lastIndexOf("://");
+		String tmp = url.substring(0, 5).toLowerCase();
+		if (index != 4 || index != 5 || (!tmp.startsWith("http://") && !tmp.startsWith("https://"))) {
+			throw new SGHttpException(String.format("The Url : '%s' had a bad protocol format and can't be fixed ",
+					url));
+		}
+		index = url.indexOf("/", 8);
+		if (index == url.length() - 1) {
+			// 类似如 http(s)://xxxx/
+			url = url.substring(0, index).toLowerCase();
+		} else if (index == -1) {
+			// 类似如 http(s)://xxxx/xxx
+			tmp = url.substring(0, index).toLowerCase();
+			url = tmp + url.substring(index, url.length());
+		} else {
+			// 类似如 http(s)://xxxx
+			url = url.toLowerCase();
+		}
+
+		return url;
+	}
 
 	/**
 	 * 获取请求地址
@@ -66,23 +101,20 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	/**
 	 * 设置请求地址,同时会对地址进行简单的头协议检查,默认设置为http(若为https,需要自行配置)
 	 */
-	public void setUrl(String url) {
+	public void setUrl(String url) throws SGHttpException {
 		if (CommonUtil.isEmpty(url)) {
 			L.e(TAG, "setUrl : url is not allowed to be null or \"\"");
 			//throw new IllegalArgumentException(TAG + ".setUrl : mUrl is not allowed to be null or \"\"");
 			return;
 		}
-		if (!url.startsWith("http://") || !url.startsWith("https://")) {
-			url = "http://" + url;
-		}
-		this.mUrl = url;
+		this.mUrl = fixUrl(url);
 	}
 
 	/**
 	 * 获取请求方法名
 	 */
-	public String getMethod() {
-		return mMethod.val();
+	public Method getMethod() {
+		return mMethod;
 	}
 
 	/**
@@ -203,12 +235,22 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 		mCache = cache;
 	}
 
-	public boolean isDeleyCache() {
-		return mDeleyCache;
+	/**
+	 * 获取请求返回的响应回调函数,无则为null
+	 */
+	public ResponseCallback getCallback() {
+		return mCallback;
 	}
 
-	public void setDeleyCache(boolean deleyCache) {
-		mDeleyCache = deleyCache;
+	/**
+	 * 设置请求响应回调函数
+	 */
+	public void setCallback(ResponseCallback callback) {
+		if (CommonUtil.isEmpty(callback)) {
+			L.i(TAG, "setCallback(ResponseCallback) : not allowed to set a null ResponseCallback object");
+			return;
+		}
+		mCallback = callback;
 	}
 
 	@Override

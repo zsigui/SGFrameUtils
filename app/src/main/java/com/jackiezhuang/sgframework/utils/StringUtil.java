@@ -10,21 +10,21 @@ import java.util.regex.Pattern;
  */
 public class StringUtil {
 
-	private static Matcher getMatcher(CharSequence data, String pattern) {
-		Pattern p = Pattern.compile(pattern);
+	private static Matcher getMatcher(CharSequence data, String pattern, int flag) {
+		Pattern p = Pattern.compile(pattern, flag);
 		return p.matcher(data);
 	}
 
-	public static boolean find(CharSequence data, String pattern) {
-		return getMatcher(data, pattern).find();
+	public static boolean find(CharSequence data, String pattern, boolean isSensitive) {
+		return getMatcher(data, pattern, isSensitive ? 0 : Pattern.CASE_INSENSITIVE).find();
 	}
 
-	public static boolean matches(CharSequence data, String pattern) {
-		return getMatcher(data, pattern).matches();
+	public static boolean matches(CharSequence data, String pattern, boolean isSensitive) {
+		return getMatcher(data, pattern, isSensitive ? 0 : Pattern.CASE_INSENSITIVE).matches();
 	}
 
-	public static String findMatch(CharSequence data, String pattern, int groupIndex) {
-		Matcher matcher = getMatcher(data, pattern);
+	public static String findMatch(CharSequence data, String pattern, int groupIndex, boolean isSensitive) {
+		Matcher matcher = getMatcher(data, pattern, isSensitive ? 0 : Pattern.CASE_INSENSITIVE);
 		String result = null;
 		if (matcher.find()) {
 			result = matcher.group(groupIndex);
@@ -32,9 +32,10 @@ public class StringUtil {
 		return result;
 	}
 
-	public static String findMatch(CharSequence data, String pattern, int groupIndex, String defaultNotFound) {
-		Matcher matcher = getMatcher(data, pattern);
-		String result = null;
+	public static String findMatch(CharSequence data, String pattern, int groupIndex, String defaultNotFound,
+	                               boolean isSensitive) {
+		Matcher matcher = getMatcher(data, pattern, isSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+		String result;
 		if (matcher.find()) {
 			result = matcher.group(groupIndex);
 		} else {
@@ -43,9 +44,9 @@ public class StringUtil {
 		return result;
 	}
 
-	public static List<String> findAllMatch(CharSequence data, String pattern, int groupIndex) {
+	public static List<String> findAllMatch(CharSequence data, String pattern, int groupIndex, boolean isSensitive) {
 		List<String> result = new ArrayList<>();
-		Matcher matcher = getMatcher(data, pattern);
+		Matcher matcher = getMatcher(data, pattern, isSensitive ? 0 : Pattern.CASE_INSENSITIVE);
 		while (matcher.find()) {
 			result.add(matcher.group(groupIndex));
 		}
