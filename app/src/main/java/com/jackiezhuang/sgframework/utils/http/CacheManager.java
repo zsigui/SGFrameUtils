@@ -1,7 +1,11 @@
 package com.jackiezhuang.sgframework.utils.http;
 
 import com.jackiezhuang.sgframework.utils.L;
+import com.jackiezhuang.sgframework.utils.SGConfig;
+import com.jackiezhuang.sgframework.utils.chiper.MD5;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.bean.CacheEntry;
+import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.itfc.IManager;
 
@@ -26,6 +30,7 @@ public enum CacheManager implements IManager{
 	// 需要执行网络请求的队列,需要由HttpManager调用设置
 	private PriorityBlockingQueue<HttpRequest> mNetworkQueue;
 	private CacheDispatcher[] mDispatchers;
+	private CacheDiskController mController;
 
 	public void setNetworkQueue(PriorityBlockingQueue<HttpRequest> networkQueue) {
 		mNetworkQueue = networkQueue;
@@ -44,19 +49,46 @@ public enum CacheManager implements IManager{
 		return null;
 	}
 
+	public void putEntry(String key, CacheEntry entry) {
+		mController.put(key, entry);
+	}
+
+	public void putEntryHeader(String key, CacheHeader entry) {
+		mController.put(key, entry);
+	}
+
+	public CacheEntry getEntry(String key) {
+		return mController.getEntry(key);
+	}
+
+	public CacheHeader getEntryHeader(String key) {
+		return mController.getHeader(key);
+	}
+
+	public byte[] getEntryData(String key) {
+		return mController.getData(key);
+	}
+
+	public static String generateKeyByUrl(String url) {
+		return MD5.digestInBase64(url, SGConfig.DEFAULT_UTF_CHARSET);
+	}
+
 	@Override
-	public void start() {
+	public synchronized void start() {
 		stop();
+		if (mController == null) {
+			mController = new CacheDiskController();
+		}
 		mDispatchers = new CacheDispatcher[2];
 		for (int i = 0; i < mDispatchers.length; i++) {
-			mDispatchers[i] = new CacheDispatcher(mCacheQueue, mNetworkQueue);
+			mDispatchers[i] = new CacheDispatcher(mController, mCacheQueue, mNetworkQueue);
 			mDispatchers[i].start();
 		}
 
 	}
 
 	@Override
-	public void stop() {
+	public synchronized void stop() {
 		if (mDispatchers != null) {
 			for (int i = 0; i < mDispatchers.length; i++) {
 				mDispatchers[i].exit();

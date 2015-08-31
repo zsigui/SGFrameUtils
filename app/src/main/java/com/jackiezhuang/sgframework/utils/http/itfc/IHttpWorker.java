@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by zsigui on 15-8-28.
  */
-public interface IHttpStack {
+public interface IHttpWorker {
 
 	HttpResponse performRequest(HttpRequest request, Map<String, String> additionalHeaders) throws IOException, SGHttpException;
 }

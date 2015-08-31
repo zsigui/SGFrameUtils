@@ -39,6 +39,8 @@ task clearJar(type: Delete) {
 	delete 'libs/SgFrameUtils.jar'
 }
 
+task copy(type: Copy){}
+
 
 // 打包jar
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {

@@ -141,7 +141,7 @@ public class CacheDiskController {
 		if (!mCacheMap.containsKey(key)) {
 			return null;
 		}
-		return new CacheEntry(mCacheMap.get(key), FileUtil.readBytes(getCacheFilePath(key) + FILE_HEADER));
+		return new CacheEntry(mCacheMap.get(key), FileUtil.readBytes(getCacheFilePath(key) + FILE_DATA));
 	}
 
 	/**

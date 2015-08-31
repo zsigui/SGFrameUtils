@@ -22,9 +22,10 @@ public class CacheDispatcher extends Dispatcher {
 	private PriorityBlockingQueue<HttpRequest> mNetworkQueue;
 	private IDelivery mDelivery = null;
 
-	public CacheDispatcher(PriorityBlockingQueue<HttpRequest> cacheQueue, PriorityBlockingQueue<HttpRequest>
+	public CacheDispatcher(CacheDiskController cacheController, PriorityBlockingQueue<HttpRequest> cacheQueue,
+	                       PriorityBlockingQueue<HttpRequest>
 			networkQueue) {
-		mCacheController = new CacheDiskController();
+		mCacheController = cacheController;
 		mCacheQueue = cacheQueue;
 		mNetworkQueue = networkQueue;
 	}

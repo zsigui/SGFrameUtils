@@ -10,7 +10,7 @@ import com.jackiezhuang.sgframework.utils.http.SGDefaultX509TrustManager;
 import com.jackiezhuang.sgframework.utils.http.SGHttpException;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
-import com.jackiezhuang.sgframework.utils.http.itfc.IHttpStack;
+import com.jackiezhuang.sgframework.utils.http.itfc.IHttpWorker;
 import com.jackiezhuang.sgframework.utils.io.IOUtil;
 
 import java.io.IOException;
@@ -29,18 +29,18 @@ import javax.net.ssl.TrustManager;
 /**
  * Created by zsigui on 15-8-28.
  */
-public class HttpConnStack implements IHttpStack {
+public class HttpConnectionWorker implements IHttpWorker {
 
 	/**
 	 * 进行Https连接方式的协议工厂
 	 */
 	private SSLSocketFactory mSSLSocketFactory;
 
-	public HttpConnStack() {
+	public HttpConnectionWorker() {
 		this(null);
 	}
 
-	public HttpConnStack(SSLSocketFactory sslSocketFactory) {
+	public HttpConnectionWorker(SSLSocketFactory sslSocketFactory) {
 		try {
 			// 设置默认自定义Https的认证方式
 			TrustManager[] tm = {new SGDefaultX509TrustManager()};
