@@ -1,5 +1,8 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import android.os.Process;
+
+import com.jackiezhuang.sgframework.utils.DateUtil;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
@@ -32,6 +35,7 @@ public class NetworkDispatcher extends Dispatcher {
 
 	@Override
 	public void run() {
+		Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 		mQuit = false;
 		while (!mQuit) {
 			HttpRequest request;
@@ -59,6 +63,7 @@ public class NetworkDispatcher extends Dispatcher {
 
 				if (HttpConfig.sNeedCache && request.shouldCache() && response.isModified()) {
 					// 添加或者更新Cache数据
+
 					CacheManager.INSTANCE.putEntry(request.getRequestKey(), request.getCache());
 				}
 
@@ -87,7 +92,7 @@ public class NetworkDispatcher extends Dispatcher {
 				additionHeaders.put("If-None-Match", header.getEtag());
 			}
 			if (header.getServerTime() > 0) {
-				additionHeaders.put("If-Modified-Since", "");
+				additionHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime())));
 			}
 		}
 		return mWorker.performRequest(request, additionHeaders);

@@ -8,10 +8,20 @@ import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
  * <p><p/>
  * Created by zsigui on 15-8-28.
  */
-public interface ResponseCallback {
+public abstract class ResponseCallback {
 
 	/**
-	 * 完成请求的结果回调，该方法执行在UI主线程中
+	 * 完成网络请求后不论成功与否都会回调，该方法执行在UI主线程中
 	 */
-	void onFinished(HttpResponse response, SGHttpException error);
+	public void onFinished(){};
+
+	/**
+	 * 执行网络请求成功后回调，该方法执行在UI主线程中
+	 */
+	public void onSuccess(HttpResponse response){};
+
+	/**
+	 * 执行网络请求失败后回调，该方法执行在UI主线程中
+	 */
+	public void onFailure(SGHttpException error){};
 }

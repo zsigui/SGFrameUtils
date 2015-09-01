@@ -30,7 +30,8 @@ public class ResultDelivery implements IDelivery {
 				}
 				HttpManager.INSTANCE.finished(request);
 				request.markDeliveried();
-				request.getCallback().onFinished(response, null);
+				request.getCallback().onSuccess(response);
+				request.getCallback().onFinished();
 			}
 		});
 	}
@@ -46,7 +47,8 @@ public class ResultDelivery implements IDelivery {
 				}
 				HttpManager.INSTANCE.finished(request);
 				request.markDeliveried();
-				request.getCallback().onFinished(null, error);
+				request.getCallback().onFailure(error);
+				request.getCallback().onFinished();
 			}
 		});
 	}

@@ -1,5 +1,7 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import android.os.Process;
+
 import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheEntry;
@@ -35,6 +37,7 @@ public class CacheDispatcher extends Dispatcher {
 
 	@Override
 	public void run() {
+		android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 		mCacheController.init();
 		mQuit = false;
 		while (!mQuit) {
