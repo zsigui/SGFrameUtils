@@ -79,19 +79,18 @@ public class NetworkDispatcher extends Dispatcher {
 	}
 
 	private HttpResponse performRequest(HttpRequest request) throws IOException, SGHttpException {
-		HttpResponse result = null;
-		Map<String, String> addtionHeaders = new HashMap<>();
+		Map<String, String> additionHeaders = null;
 		CacheHeader header = CacheManager.INSTANCE.getEntryHeader(request.getRequestKey());
 		if (!CommonUtil.isEmpty(header)) {
+			additionHeaders = new HashMap<>();
 			if (!CommonUtil.isEmpty(header.getEtag())) {
-				addtionHeaders.put("If-None-Match", header.getEtag());
+				additionHeaders.put("If-None-Match", header.getEtag());
 			}
 			if (header.getServerTime() > 0) {
-				addtionHeaders.put("If-Modified-Since", "");
+				additionHeaders.put("If-Modified-Since", "");
 			}
 		}
-		mWorker.performRequest(request, null);
-		return result;
+		return mWorker.performRequest(request, additionHeaders);
 	}
 
 }
