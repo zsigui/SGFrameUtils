@@ -1,5 +1,6 @@
 package com.jackiezhuang.sgframework.utils.http.itfc;
 
+import com.jackiezhuang.sgframework.utils.http.SGHttpException;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
 
 /**
@@ -12,5 +13,5 @@ public interface ResponseCallback {
 	/**
 	 * 完成请求的结果回调，该方法执行在UI主线程中
 	 */
-	void onFinished(HttpResponse response);
+	void onFinished(HttpResponse response, SGHttpException error);
 }

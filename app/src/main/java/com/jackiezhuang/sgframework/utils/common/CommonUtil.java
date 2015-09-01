@@ -1,6 +1,7 @@
 package com.jackiezhuang.sgframework.utils.common;
 
 import com.jackiezhuang.sgframework.utils.SGConfig;
+import com.jackiezhuang.sgframework.utils.StringUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -141,5 +142,24 @@ public final class CommonUtil {
 
 	public static void copy(Object src, int srcPos, Object dest, int destPos, int length) {
 		System.arraycopy(src, srcPos, dest, destPos, length);
+	}
+
+	/**
+	 * 将字节数组转换为非乱码字符串(会自动检测乱码并使用常用编码进行解码，故效率会比较低)
+	 */
+	public static String bytesToNoMessyStr(byte[] data) {
+		String result = null;
+		String[] charsets = new String[]{"GB2312", "UTF-8", "BIG5", "GBK", "Unicode"};
+		try {
+			for (String charset : charsets) {
+				String tmp = new String(data, charset);
+				if (!StringUtil.isMessyCode(tmp)) {
+					result = tmp;
+				}
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 }

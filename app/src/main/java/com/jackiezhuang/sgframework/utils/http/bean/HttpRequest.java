@@ -1,6 +1,7 @@
 package com.jackiezhuang.sgframework.utils.http.bean;
 
 import com.jackiezhuang.sgframework.utils.L;
+import com.jackiezhuang.sgframework.utils.chiper.MD5;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.SGHttpException;
 import com.jackiezhuang.sgframework.utils.http.itfc.ResponseCallback;
@@ -51,6 +52,7 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	private boolean mIsCanceled = false;
 	private CacheEntry mCache;
 	private ResponseCallback mCallback;
+	private boolean mIsDelivery = false;
 
 	/**
 	 * 请求优先级序列值
@@ -253,6 +255,20 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 		mCallback = callback;
 	}
 
+	/**
+	 * 是否已经进行了分发
+	 */
+	public boolean isDelivery() {
+		return mIsDelivery;
+	}
+
+	/**
+	 * 标记已经进行了分发
+	 */
+	public void markDeliveried() {
+		mIsDelivery = true;
+	}
+
 	@Override
 	public int compareTo(HttpRequest another) {
 		return this.getPriority() == another.getPriority() ? this.mSequence - another.mSequence : another.getPriority
@@ -260,7 +276,24 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	}
 
 	/**
+	 * 根据url和请求类型获取请求的键值
+	 */
+	public String getRequestKey() {
+		if (mMethod.equals(Method.DELETE) || mMethod.equals(Method.GET)) {
+			byte[] bUrl = getUrl().getBytes();
+			byte[] bParam = getOutputData();
+			byte[] bs = new byte[bUrl.length + bParam.length];
+			CommonUtil.copy(bUrl, 0, bs, 0, bUrl.length);
+			CommonUtil.copy(bParam, 0, bs, bUrl.length, bParam.length);
+			return MD5.digestInHex(bs);
+		} else {
+			return MD5.digestInHex((getUrl() + getContentType()).getBytes());
+		}
+	}
+
+	/**
 	 * 获取请求的优先级别
+	 * <p>需要由子类对应实现<p/>
 	 */
 	public abstract Priority getPriority();
 

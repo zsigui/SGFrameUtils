@@ -58,7 +58,7 @@ public class HttpUtil {
 				byte[] tmp = new byte[bodyContent.length >= 4096 ? 1024 : bodyContent.length / 4];
 				CommonUtil.copy(bodyContent, 0, tmp, 0, tmp.length);
 				result = StringUtil.findMatch(CommonUtil.bytesToStr(tmp),
-						"<meta[\\s\\S]*?Content-Type[\\s\\S]*?charset=([\\S]*?)\"[\\s]*?>", 1, defaultCharset);
+						"<meta[\\s\\S]*?Content-Type[\\s\\S]*?charset=([\\S]*?)\"[\\s]*?>", 1, defaultCharset, false);
 			}
 		} catch (IndexOutOfBoundsException e) {
 		}

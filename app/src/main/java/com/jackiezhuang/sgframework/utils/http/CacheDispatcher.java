@@ -1,5 +1,6 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheEntry;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
@@ -17,6 +18,8 @@ import java.util.concurrent.PriorityBlockingQueue;
  */
 public class CacheDispatcher extends Dispatcher {
 
+	private static final String TAG = CacheDispatcher.class.getName();
+
 	private CacheDiskController mCacheController;
 	private PriorityBlockingQueue<HttpRequest> mCacheQueue;
 	private PriorityBlockingQueue<HttpRequest> mNetworkQueue;
@@ -24,7 +27,7 @@ public class CacheDispatcher extends Dispatcher {
 
 	public CacheDispatcher(CacheDiskController cacheController, PriorityBlockingQueue<HttpRequest> cacheQueue,
 	                       PriorityBlockingQueue<HttpRequest>
-			networkQueue) {
+			                       networkQueue) {
 		mCacheController = cacheController;
 		mCacheQueue = cacheQueue;
 		mNetworkQueue = networkQueue;
@@ -37,6 +40,12 @@ public class CacheDispatcher extends Dispatcher {
 		while (!mQuit) {
 			try {
 				final HttpRequest request = mCacheQueue.take();
+
+				if (request.isCanceled()) {
+					L.i(TAG, String.format("run : request of url '%s' is canceled ", request.getUrl()));
+					continue;
+				}
+
 				CacheHeader cache = mCacheController.getHeader(request.getUrl());
 				if (CommonUtil.isEmpty(cache)) {
 					// 不存在该缓存,需要进行网络请求
@@ -59,6 +68,7 @@ public class CacheDispatcher extends Dispatcher {
 				}
 
 				mDelivery.postResponse(request, response);
+
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

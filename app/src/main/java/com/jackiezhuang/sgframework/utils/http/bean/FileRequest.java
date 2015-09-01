@@ -86,7 +86,6 @@ public class FileRequest extends HttpRequest {
 		}
 	}
 
-
 	@Override
 	public Priority getPriority() {
 		return Priority.LOW;

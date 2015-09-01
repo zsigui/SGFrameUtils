@@ -55,6 +55,13 @@ public class HttpConnectionWorker implements IHttpWorker {
 		this.mSSLSocketFactory = sslSocketFactory;
 	}
 
+	public void setSSLSocketFactory(SSLSocketFactory sslSocketFactory) {
+		if(CommonUtil.isEmpty(sslSocketFactory)) {
+			return;
+		}
+		mSSLSocketFactory = sslSocketFactory;
+	}
+
 	/**
 	 * 从给定contentType和返回HTML正文中解析出编码,如果解析不出则使用默认编码
 	 */
@@ -107,7 +114,7 @@ public class HttpConnectionWorker implements IHttpWorker {
 		result.setParsedEncoding(parseCharset(request.getContentType(), result.getBodyContent(),
 				SGConfig.DEFAULT_UTF_CHARSET));
 		result.setModified(!(connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED));
-		result.setSuccess(connection.getResponseCode() == HttpURLConnection.HTTP_OK && connection.getResponseCode() ==
+		result.setSuccess(connection.getResponseCode() == HttpURLConnection.HTTP_OK || connection.getResponseCode() ==
 				HttpURLConnection.HTTP_NOT_MODIFIED);
 		result.setHeaders(parseHeaders(connection));
 

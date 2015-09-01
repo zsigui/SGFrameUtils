@@ -1,8 +1,6 @@
 package com.jackiezhuang.sgframework.utils.http;
 
 import com.jackiezhuang.sgframework.utils.L;
-import com.jackiezhuang.sgframework.utils.SGConfig;
-import com.jackiezhuang.sgframework.utils.chiper.MD5;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheEntry;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
@@ -14,23 +12,27 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * 缓存管理操作类,负责Cache请求的添加管理
- *
+ * <p/>
  * <p></p>
  * Created by zsigui on 15-8-27.
  */
-public enum CacheManager implements IManager{
+public enum CacheManager implements IManager {
 
 	INSTANCE;
 
 	private static final String TAG = CacheManager.class.getName();
 
-	private static final int DISPACHTER_COUNT = 2;
-	// 需要执行缓存请求的队列
-	private PriorityBlockingQueue<HttpRequest> mCacheQueue = new PriorityBlockingQueue<>();
+	// 需要执行缓存请求的队列,线程安全
+	private final PriorityBlockingQueue<HttpRequest> mCacheQueue;
 	// 需要执行网络请求的队列,需要由HttpManager调用设置
 	private PriorityBlockingQueue<HttpRequest> mNetworkQueue;
 	private CacheDispatcher[] mDispatchers;
 	private CacheDiskController mController;
+
+	private CacheManager() {
+		mController = new CacheDiskController();
+		mCacheQueue = new PriorityBlockingQueue<>();
+	}
 
 	public void setNetworkQueue(PriorityBlockingQueue<HttpRequest> networkQueue) {
 		mNetworkQueue = networkQueue;
@@ -68,30 +70,34 @@ public enum CacheManager implements IManager{
 	public byte[] getEntryData(String key) {
 		return mController.getData(key);
 	}
-
+/*
 	public static String generateKeyByUrl(String url) {
 		return MD5.digestInBase64(url, SGConfig.DEFAULT_UTF_CHARSET);
 	}
+*/
 
 	@Override
 	public synchronized void start() {
 		stop();
-		if (mController == null) {
+		if (CommonUtil.isEmpty(mController)) {
 			mController = new CacheDiskController();
 		}
-		mDispatchers = new CacheDispatcher[2];
-		for (int i = 0; i < mDispatchers.length; i++) {
-			mDispatchers[i] = new CacheDispatcher(mController, mCacheQueue, mNetworkQueue);
-			mDispatchers[i].start();
+		if (!CommonUtil.isEmpty(mNetworkQueue)) {
+			mDispatchers = new CacheDispatcher[HttpConfig.sCacheThreadCount];
+			for (int i = 0; i < mDispatchers.length; i++) {
+				mDispatchers[i] = new CacheDispatcher(mController, mCacheQueue, mNetworkQueue);
+				mDispatchers[i].start();
+			}
 		}
 
 	}
 
 	@Override
 	public synchronized void stop() {
-		if (mDispatchers != null) {
+		if (!CommonUtil.isEmpty(mDispatchers)) {
 			for (int i = 0; i < mDispatchers.length; i++) {
 				mDispatchers[i].exit();
+				mDispatchers[i] = null;
 			}
 		}
 		mDispatchers = null;
@@ -119,6 +125,7 @@ public enum CacheManager implements IManager{
 	public void cancel(HttpRequest request) {
 		if (mCacheQueue.contains(request))
 			request.cancel();
+
 	}
 
 	@Override

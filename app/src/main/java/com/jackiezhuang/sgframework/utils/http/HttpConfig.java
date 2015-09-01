@@ -1,5 +1,12 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import android.os.Handler;
+import android.os.Looper;
+
+import com.jackiezhuang.sgframework.utils.http.impl.HttpConnectionWorker;
+import com.jackiezhuang.sgframework.utils.http.impl.ResultDelivery;
+import com.jackiezhuang.sgframework.utils.http.itfc.IDelivery;
+import com.jackiezhuang.sgframework.utils.http.itfc.IHttpWorker;
 import com.jackiezhuang.sgframework.utils.io.FileUtil;
 
 /**
@@ -9,6 +16,8 @@ import com.jackiezhuang.sgframework.utils.io.FileUtil;
  */
 public final class HttpConfig {
 
+	/** 是否使用缓存控制的方法,用于决定HttpManager是否控制CacheManager的执行。当为false时,忽略HttpRequest的缓存控制策略 */
+	public static boolean sNeedCache = true;
 	/** Cache存放位置 */
 	public static String sCacheDirPath = FileUtil.getExternalFilePath("SGFramework/cache");
 	/** 最大Cache大小 */
@@ -27,5 +36,18 @@ public final class HttpConfig {
 	public static int sReadTimeout = 30 * 1000;
 	/** 是否执行自动跳转 */
 	public static boolean sFollowRedirect = true;
+
+	/** 设定HttpManager网络请求线程的数量 */
+	public static int sHttpThreadCount = 4;
+	/** 设定CacheManager缓存操作线程的数量 */
+	public static int sCacheThreadCount = 2;
+
+	/** 执行网络请求结果处理的分发处理器 */
+	public static IDelivery sDelivery = new ResultDelivery(new Handler(Looper.getMainLooper()));
+
+	/** 实际执行网络请求的工作器，可以自定义传入https执行协议 */
+	public static IHttpWorker sWorker = new HttpConnectionWorker();
+
+	private HttpConfig(){};
 
 }
