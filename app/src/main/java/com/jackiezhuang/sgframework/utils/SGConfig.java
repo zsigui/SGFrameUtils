@@ -17,5 +17,9 @@ public final class SGConfig {
 	 * 通用编码格式UTF-8
 	 */
 	public static final String DEFAULT_UTF_CHARSET = "UTF-8";
+	/**
+	 * 通用编码格式ISO8859-1
+	 */
+	public static final String DEFAULT_ISO_CHARSET = "ISO8859-1";
 
 }

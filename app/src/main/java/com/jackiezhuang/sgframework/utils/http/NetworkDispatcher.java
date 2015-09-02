@@ -3,15 +3,19 @@ package com.jackiezhuang.sgframework.utils.http;
 import android.os.Process;
 
 import com.jackiezhuang.sgframework.utils.DateUtil;
+import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
 import com.jackiezhuang.sgframework.utils.http.bean.DownloadRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
+import com.jackiezhuang.sgframework.utils.http.bean.NetworkResponse;
 import com.jackiezhuang.sgframework.utils.http.itfc.IDelivery;
 import com.jackiezhuang.sgframework.utils.http.itfc.IHttpWorker;
+import com.jackiezhuang.sgframework.utils.io.IOUtil;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -68,7 +72,6 @@ public class NetworkDispatcher extends Dispatcher {
 				}
 				if (HttpConfig.sNeedCache && request.shouldCache() && response.isModified()) {
 					// 添加或者更新Cache数据
-
 					CacheManager.INSTANCE.putEntry(request.getRequestKey(), request.getCache());
 				}
 
@@ -100,7 +103,22 @@ public class NetworkDispatcher extends Dispatcher {
 				additionHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime())));
 			}
 		}
-		return mWorker.performRequest(request, additionHeaders);
+		NetworkResponse response = mWorker.performRequest(request, additionHeaders);
+		HttpResponse result = new HttpResponse();
+		result.setModified(!(response.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED));
+		result.setSuccess(response.getResponseCode() == HttpURLConnection.HTTP_OK || response.getResponseCode() ==
+				HttpURLConnection.HTTP_NOT_MODIFIED);
+		result.setStatusCode(response.getResponseCode());
+		result.setParsedEncoding(HttpUtil.parseCharset(response.getContentType(), result.getBodyContent(),
+				SGConfig.DEFAULT_ISO_CHARSET));
+		result.setHeaders(HttpUtil.parseResponseHeader(response.getHeaders()));
+		if (request instanceof DownloadRequest) {
+			((DownloadRequest)request).handleRespContent(response.getContent());
+		} else {
+			result.setBodyContent(IOUtil.readBytes(response.getContent()));
+		}
+
+		return result;
 	}
 
 }

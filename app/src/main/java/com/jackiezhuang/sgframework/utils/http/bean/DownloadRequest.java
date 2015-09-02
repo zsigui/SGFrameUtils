@@ -1,5 +1,7 @@
 package com.jackiezhuang.sgframework.utils.http.bean;
 
+import java.io.InputStream;
+
 /**
  * 下载请求类
  *
@@ -23,4 +25,7 @@ public class DownloadRequest extends HttpRequest{
 		return new byte[0];
 	}
 
+	public void handleRespContent(InputStream content) {
+
+	}
 }

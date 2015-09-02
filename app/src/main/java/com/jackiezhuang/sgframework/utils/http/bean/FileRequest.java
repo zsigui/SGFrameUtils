@@ -102,7 +102,9 @@ public class FileRequest extends HttpRequest {
 	@Override
 	public byte[] getOutputData() {
 		try {
-			mOutputData.write(String.format("--%s--\r\n", mBoundary).getBytes());
+			if (mOutputData.size() != 0) {
+				mOutputData.write(String.format("--%s--\r\n", mBoundary).getBytes());
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

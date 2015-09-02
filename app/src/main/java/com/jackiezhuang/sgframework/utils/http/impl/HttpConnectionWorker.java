@@ -1,15 +1,15 @@
 package com.jackiezhuang.sgframework.utils.http.impl;
 
-import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.StringUtil;
 import com.jackiezhuang.sgframework.utils.common.ByteArrayPool;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.HttpConfig;
+import com.jackiezhuang.sgframework.utils.http.HttpUtil;
 import com.jackiezhuang.sgframework.utils.http.SGDefaultHostnameVerifier;
 import com.jackiezhuang.sgframework.utils.http.SGDefaultX509TrustManager;
 import com.jackiezhuang.sgframework.utils.http.SGHttpException;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
-import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
+import com.jackiezhuang.sgframework.utils.http.bean.NetworkResponse;
 import com.jackiezhuang.sgframework.utils.http.itfc.IHttpWorker;
 import com.jackiezhuang.sgframework.utils.io.IOUtil;
 
@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -92,7 +93,7 @@ public class HttpConnectionWorker implements IHttpWorker {
 	}
 
 	@Override
-	public HttpResponse performRequest(HttpRequest request, Map<String, String> additionalHeaders) throws IOException,
+	public NetworkResponse performRequest(HttpRequest request, Map<String, String> additionalHeaders) throws IOException,
 			SGHttpException {
 		HttpURLConnection connection = openConnection(new URL(request.getUrl()));
 		writeOutputData(request, connection);
@@ -103,22 +104,25 @@ public class HttpConnectionWorker implements IHttpWorker {
 		InputStream in;
 		try {
 			in = connection.getInputStream();
+			if (HttpUtil.isGzipStream(connection)) {
+				// 使用Gzip流方式进行读取
+				in = new GZIPInputStream(in);
+			}
 		} catch (Exception e) {
 			in = connection.getErrorStream();
 		}
 
 		// 设置返回响应信息
-		HttpResponse result = new HttpResponse();
-		result.setBodyContent(IOUtil.readBytes(in));
-		result.setStatusCode(connection.getResponseCode());
-		result.setParsedEncoding(parseCharset(request.getContentType(), result.getBodyContent(),
-				SGConfig.DEFAULT_UTF_CHARSET));
-		result.setModified(!(connection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED));
-		result.setSuccess(connection.getResponseCode() == HttpURLConnection.HTTP_OK || connection.getResponseCode() ==
-				HttpURLConnection.HTTP_NOT_MODIFIED);
+		NetworkResponse result = new NetworkResponse();
 		result.setHeaders(parseHeaders(connection));
-
-		connection.disconnect();
+		result.setContent(in);
+		result.setContentEncoding(connection.getContentEncoding());
+		result.setContentLength(connection.getContentLength());
+		result.setContentType(connection.getContentType());
+		result.setDate(connection.getDate());
+		result.setIfModifiedSince(connection.getIfModifiedSince());
+		result.setLastModified(connection.getLastModified());
+		result.setResponseCode(connection.getResponseCode());
 
 		return result;
 	}
