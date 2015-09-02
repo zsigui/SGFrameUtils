@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * 文件上传请求类
+ *
+ * <p><p/>
  * Created by zsigui on 15-8-24.
  */
 public class FileRequest extends HttpRequest {

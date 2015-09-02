@@ -3,6 +3,9 @@ package com.jackiezhuang.sgframework.utils.system;
 import android.os.Build;
 
 /**
+ * 获取系统信息的工具类
+ *
+ * <p></p>
  * Created by zsigui on 15-8-17.
  */
 public final class SystemTool {

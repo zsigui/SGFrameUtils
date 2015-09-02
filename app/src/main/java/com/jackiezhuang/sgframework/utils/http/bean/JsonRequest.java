@@ -4,6 +4,9 @@ import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 
 /**
+ * Json上传请求类
+ *
+ * <p></p>
  * Created by zsigui on 15-8-24.
  */
 public class JsonRequest extends HttpRequest {

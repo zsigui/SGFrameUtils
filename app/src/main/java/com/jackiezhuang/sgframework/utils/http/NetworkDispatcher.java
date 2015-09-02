@@ -5,6 +5,7 @@ import android.os.Process;
 import com.jackiezhuang.sgframework.utils.DateUtil;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
+import com.jackiezhuang.sgframework.utils.http.bean.DownloadRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
 import com.jackiezhuang.sgframework.utils.http.itfc.IDelivery;
@@ -61,6 +62,10 @@ public class NetworkDispatcher extends Dispatcher {
 					continue;
 				}
 
+				if (request instanceof DownloadRequest) {
+					mDelivery.postDownloadProgress(request, 0, 0);
+					return;
+				}
 				if (HttpConfig.sNeedCache && request.shouldCache() && response.isModified()) {
 					// 添加或者更新Cache数据
 
