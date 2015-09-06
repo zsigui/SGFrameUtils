@@ -1,7 +1,5 @@
 package com.jackiezhuang.sgframework.utils.http.impl;
 
-import com.jackiezhuang.sgframework.utils.StringUtil;
-import com.jackiezhuang.sgframework.utils.common.ByteArrayPool;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.HttpConfig;
 import com.jackiezhuang.sgframework.utils.http.HttpUtil;
@@ -61,35 +59,6 @@ public class HttpConnectionWorker implements IHttpWorker {
 			return;
 		}
 		mSSLSocketFactory = sslSocketFactory;
-	}
-
-	/**
-	 * 从给定contentType和返回HTML正文中解析出编码,如果解析不出则使用默认编码
-	 */
-	private String parseCharset(String contentType, byte[] bodyContent, String defaultCharset) {
-		String result = defaultCharset;
-		byte[] tmp = null;
-		try {
-			int index = contentType.indexOf("charset=");
-			if (index != -1)
-				result = contentType.substring(index + 8).toUpperCase();
-			else {
-				tmp = ByteArrayPool.init().obtain(bodyContent.length >= 4096 ? 1024 : bodyContent.length / 4);
-				CommonUtil.copy(bodyContent, 0, tmp, 0, tmp.length);
-				result = StringUtil.findMatch(CommonUtil.bytesToStr(tmp),
-						"<meta[\\s\\S]*?Content-Type[\\s\\S]*?charset=([\\S]*?)\"[\\s]*?>", 1, defaultCharset, false);
-			}
-		} catch (IndexOutOfBoundsException e) {
-			// Nothing to do here
-		} finally {
-			if (!CommonUtil.isEmpty(tmp)) {
-				ByteArrayPool.init().add(tmp);
-			}
-		}
-		if (CommonUtil.isEmpty(result)) {
-			result = defaultCharset;
-		}
-		return result;
 	}
 
 	@Override

@@ -91,6 +91,9 @@ public class NetworkDispatcher extends Dispatcher {
 		}
 	}
 
+	/**
+	 * 执行网络请求并返回结果
+	 */
 	private HttpResponse performRequest(HttpRequest request) throws IOException, SGHttpException {
 		Map<String, String> additionHeaders = null;
 		CacheHeader header = CacheManager.INSTANCE.getEntryHeader(request.getRequestKey());
@@ -100,24 +103,28 @@ public class NetworkDispatcher extends Dispatcher {
 				additionHeaders.put("If-None-Match", header.getEtag());
 			}
 			if (header.getServerTime() > 0) {
-				additionHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime())));
+				additionHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime
+						())));
 			}
 		}
 		NetworkResponse response = mWorker.performRequest(request, additionHeaders);
-		HttpResponse result = new HttpResponse();
-		result.setModified(!(response.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED));
-		result.setSuccess(response.getResponseCode() == HttpURLConnection.HTTP_OK || response.getResponseCode() ==
-				HttpURLConnection.HTTP_NOT_MODIFIED);
-		result.setStatusCode(response.getResponseCode());
-		result.setParsedEncoding(HttpUtil.parseCharset(response.getContentType(), result.getBodyContent(),
-				SGConfig.DEFAULT_ISO_CHARSET));
-		result.setHeaders(HttpUtil.parseResponseHeader(response.getHeaders()));
-		if (request instanceof DownloadRequest) {
-			((DownloadRequest)request).handleRespContent(response);
+
+		HttpResponse result = null;
+		if (request instanceof DownloadRequest && response.getResponseCode() == HttpURLConnection.HTTP_OK) {
+			// 对于下载文件的请求,交由其它控制程序处理
+			((DownloadRequest) request).handleRespContent(response);
 		} else {
+			// 非下载文件请求，解析并返回结果
+			result = new HttpResponse();
+			result.setModified(!(response.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED));
+			result.setSuccess(response.getResponseCode() == HttpURLConnection.HTTP_OK || response.getResponseCode() ==
+					HttpURLConnection.HTTP_NOT_MODIFIED);
+			result.setStatusCode(response.getResponseCode());
+			result.setParsedEncoding(HttpUtil.parseCharset(response.getContentType(), result.getBodyContent(),
+					SGConfig.DEFAULT_ISO_CHARSET));
+			result.setHeaders(HttpUtil.parseResponseHeader(response.getHeaders()));
 			result.setBodyContent(IOUtil.readBytes(response.getContent()));
 		}
-
 		return result;
 	}
 
