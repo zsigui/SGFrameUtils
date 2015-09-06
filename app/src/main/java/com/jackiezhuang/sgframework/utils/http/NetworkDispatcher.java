@@ -60,16 +60,16 @@ public class NetworkDispatcher extends Dispatcher {
 				// 执行请求
 				HttpResponse response = performRequest(request);
 
+				if (request instanceof DownloadRequest) {
+					return;
+				}
+
 				if (!response.isModified() && request.isDelivery()) {
 					// 网络请求结果未变化且该请求已经分发过，无须再处理
 					HttpManager.INSTANCE.finished(request);
 					continue;
 				}
 
-				if (request instanceof DownloadRequest) {
-					mDelivery.postDownloadProgress(request, 0, 0);
-					return;
-				}
 				if (HttpConfig.sNeedCache && request.shouldCache() && response.isModified()) {
 					// 添加或者更新Cache数据
 					CacheManager.INSTANCE.putEntry(request.getRequestKey(), request.getCache());
@@ -113,7 +113,7 @@ public class NetworkDispatcher extends Dispatcher {
 				SGConfig.DEFAULT_ISO_CHARSET));
 		result.setHeaders(HttpUtil.parseResponseHeader(response.getHeaders()));
 		if (request instanceof DownloadRequest) {
-			((DownloadRequest)request).handleRespContent(response.getContent());
+			((DownloadRequest)request).handleRespContent(response);
 		} else {
 			result.setBodyContent(IOUtil.readBytes(response.getContent()));
 		}
