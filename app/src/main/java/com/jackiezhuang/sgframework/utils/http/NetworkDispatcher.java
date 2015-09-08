@@ -122,8 +122,10 @@ public class NetworkDispatcher extends Dispatcher {
 			result.setStatusCode(response.getResponseCode());
 			result.setParsedEncoding(HttpUtil.parseCharset(response.getContentType(), result.getBodyContent(),
 					SGConfig.DEFAULT_ISO_CHARSET));
-			result.setHeaders(HttpUtil.parseResponseHeader(response.getHeaders()));
+			result.setHeaders(response.getHeaders());
 			result.setBodyContent(IOUtil.readBytes(response.getContent()));
+			// 写入缓存
+			CacheManager.INSTANCE.putEntry(request.getRequestKey(), HttpUtil.parseResponseHeader(response));
 		}
 		return result;
 	}

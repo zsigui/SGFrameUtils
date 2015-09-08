@@ -47,6 +47,11 @@ public final class HttpConfig {
 
 	/** 实际执行网络请求的工作器，可以自定义传入https执行协议 */
 	public static IHttpWorker sWorker = new HttpConnectionWorker();
+	/** 设置是否使用服务器的缓存控制设置 */
+	public static boolean sUseSeverControl = true;
+	/** 自定义缓存控制的缓存有效时间，单位：分钟 */
+	public static long sCacheTime = 10;
+
 
 	private HttpConfig(){};
 
