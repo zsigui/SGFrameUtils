@@ -11,17 +11,25 @@ import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
 public abstract class ResponseCallback {
 
 	/**
-	 * 完成网络请求后不论成功与否都会回调，该方法执行在UI主线程中
+	 * 完成网络请求后不论成功与否都会回调
 	 */
 	public void onFinished(){};
 
 	/**
-	 * 执行网络请求成功后回调，该方法执行在UI主线程中
+	 * 执行网络请求成功后回调
 	 */
 	public void onSuccess(HttpResponse response){};
 
 	/**
-	 * 执行网络请求失败后回调，该方法执行在UI主线程中
+	 * 执行网络请求失败后回调
 	 */
 	public void onFailure(SGHttpException error){};
+
+	/**
+	 * 执行下载网络请求后的下载进度回调
+	 * <p>注意：该方法只会响应下载请求<p/>
+	 * @param currentSize
+	 * @param totalSize
+	 */
+	public void onDownload(long currentSize, long totalSize){};
 }

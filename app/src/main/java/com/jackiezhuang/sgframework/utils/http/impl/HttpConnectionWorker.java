@@ -55,19 +55,20 @@ public class HttpConnectionWorker implements IHttpWorker {
 	}
 
 	public void setSSLSocketFactory(SSLSocketFactory sslSocketFactory) {
-		if(CommonUtil.isEmpty(sslSocketFactory)) {
+		if (CommonUtil.isEmpty(sslSocketFactory)) {
 			return;
 		}
 		mSSLSocketFactory = sslSocketFactory;
 	}
 
 	@Override
-	public NetworkResponse performRequest(HttpRequest request, Map<String, String> additionalHeaders) throws IOException,
+	public NetworkResponse performRequest(HttpRequest request) throws
+			IOException,
 			SGHttpException {
 		HttpURLConnection connection = openConnection(new URL(request.getUrl()));
 		writeOutputData(request, connection);
 		connection.setRequestMethod(request.getMethod().val());
-		addHeaders(request, additionalHeaders, connection);
+		addHeaders(request, connection);
 
 
 		InputStream in;
@@ -105,10 +106,18 @@ public class HttpConnectionWorker implements IHttpWorker {
 				.entrySet()) {
 			if (header.getKey() != null) {
 				String value = "";
-				for (String v : header.getValue()) {
-					value += (v + "; ");
+				if (header.getKey().equals("Set-Cookie")) {
+					for (String v : header.getValue()) {
+						int i = v.indexOf(";");
+						value += (v.substring(0, i == -1 ? v.length() : i).trim() + "; ");
+					}
+					headers.put("Cookie", value);
+				} else {
+					for (String v : header.getValue()) {
+						value += (v + "; ");
+					}
+					headers.put(header.getKey(), value);
 				}
-				headers.put(header.getKey(), value);
 			}
 		}
 		return headers;
@@ -117,10 +126,7 @@ public class HttpConnectionWorker implements IHttpWorker {
 	/**
 	 * 往请求连接中添加所有头属性信息
 	 */
-	private void addHeaders(HttpRequest request, Map<String, String> additionalHeaders, HttpURLConnection connection) {
-		Map<String, String> headers = new HashMap<>();
-		headers.putAll(additionalHeaders);
-		headers.putAll(request.getRequestHeaders());
+	private void addHeaders(HttpRequest request, HttpURLConnection connection) {
 		for (Map.Entry<String, String> header : request.getRequestHeaders().entrySet()) {
 			connection.addRequestProperty(header.getKey(), header.getValue());
 		}

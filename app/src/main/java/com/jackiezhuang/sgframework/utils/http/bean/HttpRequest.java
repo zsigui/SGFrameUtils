@@ -265,7 +265,7 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	/**
 	 * 标记已经进行了分发
 	 */
-	public void markDeliveried() {
+	public void markDelivered() {
 		mIsDelivery = true;
 	}
 

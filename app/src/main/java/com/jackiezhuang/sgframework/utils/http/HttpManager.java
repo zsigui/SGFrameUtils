@@ -44,7 +44,7 @@ public enum HttpManager implements IManager {
 	@Override
 	public void start() {
 		stop();
-		if (HttpConfig.sNeedCache) {
+		if (HttpConfig.sNeedCacheControl) {
 			CacheManager.INSTANCE.start();
 			CacheManager.INSTANCE.setNetworkQueue(mNetworkQueue);
 		}
@@ -59,7 +59,7 @@ public enum HttpManager implements IManager {
 
 	@Override
 	public void stop() {
-		if (HttpConfig.sNeedCache) {
+		if (HttpConfig.sNeedCacheControl) {
 			CacheManager.INSTANCE.stop();
 		}
 		if (!CommonUtil.isEmpty(mNetworkDispatcher)) {
@@ -85,7 +85,7 @@ public enum HttpManager implements IManager {
 		// 设置请求的执行序列
 		request.setSequence(mSequenceGenerator.incrementAndGet());
 
-		if (!HttpConfig.sNeedCache || !request.shouldCache()) {
+		if (!HttpConfig.sNeedCacheControl || !request.shouldCache()) {
 			// 无须缓存，直接请求
 			mNetworkQueue.add(request);
 			return;
@@ -118,7 +118,7 @@ public enum HttpManager implements IManager {
 			mWorkRequests.remove(request);
 		}
 
-		if (HttpConfig.sNeedCache && request.shouldCache()) {
+		if (HttpConfig.sNeedCacheControl && request.shouldCache()) {
 			// 使用缓存，将等待的同一类型请求都放到缓存管理器中去处理
 			String requestKey = request.getRequestKey();
 			synchronized (mWaitingRequests) {

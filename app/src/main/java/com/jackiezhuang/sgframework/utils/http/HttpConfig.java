@@ -1,8 +1,5 @@
 package com.jackiezhuang.sgframework.utils.http;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import com.jackiezhuang.sgframework.utils.http.impl.HttpConnectionWorker;
 import com.jackiezhuang.sgframework.utils.http.impl.ResultDelivery;
 import com.jackiezhuang.sgframework.utils.http.itfc.IDelivery;
@@ -16,8 +13,7 @@ import com.jackiezhuang.sgframework.utils.io.FileUtil;
  */
 public final class HttpConfig {
 
-	/** 是否使用缓存控制的方法,用于决定HttpManager是否控制CacheManager的执行。当为false时,忽略HttpRequest的缓存控制策略 */
-	public static boolean sNeedCache = true;
+
 	/** Cache存放位置 */
 	public static String sCacheDirPath = FileUtil.getExternalFilePath("SGFramework/cache");
 	/** 最大Cache大小 */
@@ -43,13 +39,17 @@ public final class HttpConfig {
 	public static int sCacheThreadCount = 2;
 
 	/** 执行网络请求结果处理的分发处理器 */
-	public static IDelivery sDelivery = new ResultDelivery(new Handler(Looper.getMainLooper()));
+	public static IDelivery sDelivery = new ResultDelivery();
 
 	/** 实际执行网络请求的工作器，可以自定义传入https执行协议 */
 	public static IHttpWorker sWorker = new HttpConnectionWorker();
-	/** 设置是否使用服务器的缓存控制设置 */
+	/** 是否使用缓存控制的方法,用于决定HttpManager是否控制CacheManager的执行。当为false时,忽略HttpRequest的缓存控制策略 */
+	public static boolean sNeedCacheControl = true;
+	/** 是否使用缓存头信息，用于决定在执行HTTP请求时 */
+	public static boolean sUseCacheHeader = true;
+	/** 设置是否使用服务器的缓存控制设置。受限于{@link #sNeedCacheControl} */
 	public static boolean sUseSeverControl = true;
-	/** 自定义缓存控制的缓存有效时间，单位：分钟 */
+	/** 自定义缓存控制的缓存有效时间，单位：分钟。受限于{@link #sUseSeverControl} */
 	public static long sCacheTime = 10;
 
 

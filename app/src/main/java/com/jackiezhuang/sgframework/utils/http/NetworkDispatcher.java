@@ -61,18 +61,13 @@ public class NetworkDispatcher extends Dispatcher {
 				HttpResponse response = performRequest(request);
 
 				if (request instanceof DownloadRequest) {
-					return;
+					continue;
 				}
 
 				if (!response.isModified() && request.isDelivery()) {
 					// 网络请求结果未变化且该请求已经分发过，无须再处理
 					HttpManager.INSTANCE.finished(request);
 					continue;
-				}
-
-				if (HttpConfig.sNeedCache && request.shouldCache() && response.isModified()) {
-					// 添加或者更新Cache数据
-					CacheManager.INSTANCE.putEntry(request.getRequestKey(), request.getCache());
 				}
 
 				if (response.isSuccess()) {
@@ -95,20 +90,8 @@ public class NetworkDispatcher extends Dispatcher {
 	 * 执行网络请求并返回结果
 	 */
 	private HttpResponse performRequest(HttpRequest request) throws IOException, SGHttpException {
-		Map<String, String> additionHeaders = null;
-		CacheHeader header = CacheManager.INSTANCE.getEntryHeader(request.getRequestKey());
-		if (!CommonUtil.isEmpty(header)) {
-			additionHeaders = new HashMap<>();
-			if (!CommonUtil.isEmpty(header.getEtag())) {
-				additionHeaders.put("If-None-Match", header.getEtag());
-			}
-			if (header.getServerTime() > 0) {
-				additionHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime
-						())));
-			}
-		}
-		NetworkResponse response = mWorker.performRequest(request, additionHeaders);
-
+		addCacheHeader(request);
+		NetworkResponse response = mWorker.performRequest(request);
 		HttpResponse result = null;
 		if (request instanceof DownloadRequest && response.getResponseCode() == HttpURLConnection.HTTP_OK) {
 			// 对于下载文件的请求,交由其它控制程序处理
@@ -124,8 +107,53 @@ public class NetworkDispatcher extends Dispatcher {
 					SGConfig.DEFAULT_ISO_CHARSET));
 			result.setHeaders(response.getHeaders());
 			result.setBodyContent(IOUtil.readBytes(response.getContent()));
-			// 写入缓存
-			CacheManager.INSTANCE.putEntry(request.getRequestKey(), HttpUtil.parseResponseHeader(response));
+			if (HttpConfig.sNeedCacheControl && request.shouldCache() && result.isModified()) {
+				// 写入缓存
+				CacheManager.INSTANCE.putEntry(request.getRequestKey(), HttpUtil.parseResponseHeader(response));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 添加额外的缓存头信息
+	 */
+	private void addCacheHeader(HttpRequest request) {
+		if (HttpConfig.sUseCacheHeader) {
+			CacheHeader header = CacheManager.INSTANCE.getEntryHeader(request.getRequestKey());
+			Map<String, String> requestHeaders = request.getRequestHeaders();
+			if (!CommonUtil.isEmpty(header)) {
+				if (!CommonUtil.isEmpty(header.getEtag()) && !requestHeaders.containsKey("If-None-Match")) {
+					requestHeaders.put("If-None-Match", header.getEtag());
+				}
+				if (header.getServerTime() > 0 && !requestHeaders.containsKey("If-Modified-Since")) {
+					requestHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime
+							())));
+				}
+				if (!CommonUtil.isEmpty(header) && header.getResponseheaders().containsKey("Cookie")) {
+					String cacheCookie = header.getResponseheaders().get("Cookie");
+					// 设置Cookie头，去除重复的，使用新添加的替换Cache缓存的
+					if (requestHeaders.containsKey("Cookie")) {
+						Map<String, String> cacheCookieMap = getCookieMap(cacheCookie);
+						cacheCookieMap.putAll(getCookieMap(requestHeaders.get("Cookie")));
+						cacheCookie = "";
+						for (Map.Entry<String, String> item : cacheCookieMap.entrySet()) {
+							cacheCookie += item.getKey() + "=" + item.getValue() + ";";
+						}
+					}
+					requestHeaders.put("Cookie", cacheCookie);
+				}
+			}
+			request.setRequestHeaders(requestHeaders);
+		}
+	}
+
+	private Map<String, String> getCookieMap(String cacheCookie) {
+		Map<String, String> result = new HashMap<>();
+		String[] cookieItems = cacheCookie.split(";");
+		for (String item : cookieItems) {
+			String[] keyVal = item.split("=");
+			result.put(keyVal[0].trim(), keyVal[1].trim());
 		}
 		return result;
 	}
