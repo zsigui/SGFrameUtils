@@ -50,7 +50,6 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	private Map<String, String> mRequestHeaders;
 	private boolean mShouldCache;
 	private boolean mIsCanceled = false;
-	private CacheEntry mCache;
 	private ResponseCallback mCallback;
 	private boolean mIsDelivery = false;
 
@@ -217,24 +216,6 @@ public abstract class HttpRequest implements Comparable<HttpRequest> {
 	 */
 	public void setSequence(int sequence) {
 		mSequence = sequence;
-	}
-
-	/**
-	 * 获取缓存Cache信息
-	 */
-	public CacheEntry getCache() {
-		return mCache;
-	}
-
-	/**
-	 * 设置缓存Cache信息,当实施缓存控制策略时生效
-	 */
-	public void setCache(CacheEntry cache) {
-		if (CommonUtil.isEmpty(cache)) {
-			L.i(TAG, "setCache(CacheEntry) : not allowed to set a null CacheEntry object");
-			return;
-		}
-		mCache = cache;
 	}
 
 	/**

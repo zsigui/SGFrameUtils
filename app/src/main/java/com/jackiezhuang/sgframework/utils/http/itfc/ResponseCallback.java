@@ -13,17 +13,17 @@ public abstract class ResponseCallback {
 	/**
 	 * 完成网络请求后不论成功与否都会回调
 	 */
-	public void onFinished(){};
+	public void onFinished(){}
 
 	/**
 	 * 执行网络请求成功后回调
 	 */
-	public void onSuccess(HttpResponse response){};
+	public void onSuccess(HttpResponse response){}
 
 	/**
 	 * 执行网络请求失败后回调
 	 */
-	public void onFailure(SGHttpException error){};
+	public void onFailure(SGHttpException error){}
 
 	/**
 	 * 执行下载网络请求后的下载进度回调
@@ -31,5 +31,5 @@ public abstract class ResponseCallback {
 	 * @param currentSize
 	 * @param totalSize
 	 */
-	public void onDownload(long currentSize, long totalSize){};
+	public void onDownload(long currentSize, long totalSize){}
 }

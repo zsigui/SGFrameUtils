@@ -130,8 +130,8 @@ public class NetworkDispatcher extends Dispatcher {
 					requestHeaders.put("If-Modified-Since", DateUtil.formatGMTDate(DateUtil.getDate(header.getServerTime
 							())));
 				}
-				if (!CommonUtil.isEmpty(header) && header.getResponseheaders().containsKey("Cookie")) {
-					String cacheCookie = header.getResponseheaders().get("Cookie");
+				if (!CommonUtil.isEmpty(header) && header.getResponseHeaders().containsKey("Cookie")) {
+					String cacheCookie = header.getResponseHeaders().get("Cookie");
 					// 设置Cookie头，去除重复的，使用新添加的替换Cache缓存的
 					if (requestHeaders.containsKey("Cookie")) {
 						Map<String, String> cacheCookieMap = getCookieMap(cacheCookie);

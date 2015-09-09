@@ -310,9 +310,10 @@ public class CacheDiskController {
 		builder.append(entry.getLastModifiedTime()).append("\n");
 		builder.append(entry.getExpireTime()).append("\n");
 		builder.append(entry.getDataSize()).append("\n");
+		builder.append(entry.getParsedEncoding()).append("\n");
 		builder.append(MAGIC);
-		for (Map.Entry<String, String> item : entry.getResponseheaders().entrySet()) {
-			builder.append(item.getKey()).append("=").append(item.getValue()).append("\n");
+		for (Map.Entry<String, String> item : entry.getResponseHeaders().entrySet()) {
+			builder.append(item.getKey()).append(":").append(item.getValue()).append("\n");
 		}
 		FileUtil.writeString(getCacheFilePath(key) + FILE_HEADER, builder.toString(), SGConfig.DEFAULT_UTF_CHARSET);
 	}
@@ -332,7 +333,7 @@ public class CacheDiskController {
 		CacheHeader result = null;
 		String[] headers = FileUtil.readString(getCacheFilePath(key) + FILE_HEADER,
 				SGConfig.DEFAULT_UTF_CHARSET).split("\n");
-		if (MAGIC == Integer.parseInt(headers[0]) && (MAGIC == Integer.parseInt(headers[7]))) {
+		if (MAGIC == Integer.parseInt(headers[0]) && (MAGIC == Integer.parseInt(headers[8]))) {
 			result = new CacheHeader();
 			setHeaderInfo(result, headers);
 		}
@@ -345,7 +346,7 @@ public class CacheDiskController {
 	private CacheHeader readHeader(File file) {
 		CacheHeader result = null;
 		String[] headers = FileUtil.readString(file, SGConfig.DEFAULT_UTF_CHARSET).split("\n");
-		if (MAGIC == Integer.parseInt(headers[0]) && (MAGIC == Integer.parseInt(headers[7]))) {
+		if (MAGIC == Integer.parseInt(headers[0]) && (MAGIC == Integer.parseInt(headers[8]))) {
 			result = new CacheHeader();
 			setHeaderInfo(result, headers);
 		}
@@ -362,10 +363,12 @@ public class CacheDiskController {
 		result.setLastModifiedTime(Long.parseLong(headers[4]));
 		result.setExpireTime(Long.parseLong(headers[5]));
 		result.setDataSize(Long.parseLong(headers[6]));
+		result.setParsedEncoding(headers[7]);
 		Map<String, String> respHeaders = new HashMap<>(headers.length - 8);
-		for (int i = 8; i < headers.length; i++) {
-			String[] keyVal = headers[i].split("=");
+		for (int i = 9; i < headers.length; i++) {
+			String[] keyVal = headers[i].split(":");
 			respHeaders.put(keyVal[0], keyVal[1]);
 		}
+		result.setResponseHeaders(respHeaders);
 	}
 }

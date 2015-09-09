@@ -1,28 +1,22 @@
 package com.jackiezhuang.sgframework.utils.http.bean;
 
-import java.util.Map;
-
 /**
  * Created by zsigui on 15-8-24.
  */
-public class CacheEntry {
+public class CacheEntry extends CacheItem {
 
-	private String mEtag;
-	private long mExpireTime;
-	private long mServerTime;
-	private long mLastModifiedTime;
-	private Map<String, String> mResponseHeaders;
 	private byte[] mData;
 
 	public CacheEntry() {}
 
-	public CacheEntry(CacheHeader header, byte[] data) {
-		mEtag = header.getEtag();
-		mExpireTime = header.getExpireTime();
-		mServerTime = header.getServerTime();
-		mLastModifiedTime = header.getLastModifiedTime();
+	public CacheEntry(CacheHeader entry, byte[] data) {
 		mData = data;
-		mResponseHeaders = header.getResponseheaders();
+		setEtag(entry.getEtag());
+		setExpireTime(entry.getExpireTime());
+		setServerTime(entry.getServerTime());
+		setLastModifiedTime(entry.getLastModifiedTime());
+		setResponseHeaders(entry.getResponseHeaders());
+		setParsedEncoding(entry.getParsedEncoding());
 	}
 
 	public byte[] getData() {
@@ -33,43 +27,4 @@ public class CacheEntry {
 		mData = data;
 	}
 
-	public String getEtag() {
-		return mEtag;
-	}
-
-	public void setEtag(String etag) {
-		mEtag = etag;
-	}
-
-	public long getExpireTime() {
-		return mExpireTime;
-	}
-
-	public void setExpireTime(long expireTime) {
-		mExpireTime = expireTime;
-	}
-
-	public long getServerTime() {
-		return mServerTime;
-	}
-
-	public void setServerTime(long serverTime) {
-		mServerTime = serverTime;
-	}
-
-	public long getLastModifiedTime() {
-		return mLastModifiedTime;
-	}
-
-	public void setLastModifiedTime(long lastModifiedTime) {
-		mLastModifiedTime = lastModifiedTime;
-	}
-
-	public Map<String, String> getResponseHeaders() {
-		return mResponseHeaders;
-	}
-
-	public void setResponseHeaders(Map<String, String> responseHeaders) {
-		this.mResponseHeaders = responseHeaders;
-	}
 }

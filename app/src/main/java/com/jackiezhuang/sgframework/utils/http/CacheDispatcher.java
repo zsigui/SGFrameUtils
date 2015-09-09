@@ -4,7 +4,6 @@ import android.os.Process;
 
 import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
-import com.jackiezhuang.sgframework.utils.http.bean.CacheEntry;
 import com.jackiezhuang.sgframework.utils.http.bean.CacheHeader;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.HttpResponse;
@@ -41,29 +40,36 @@ public class CacheDispatcher extends Dispatcher {
 		mCacheController.init();
 		mQuit = false;
 		while (!mQuit) {
+			HttpRequest request = null;
 			try {
-				final HttpRequest request = mCacheQueue.take();
-
+				request = mCacheQueue.take();
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			try {
 				if (request.isCanceled()) {
 					L.i(TAG, String.format("run : request of url '%s' is canceled ", request.getUrl()));
+					HttpManager.INSTANCE.finished(request);
 					continue;
 				}
 
-				CacheHeader cache = mCacheController.getHeader(request.getUrl());
+				CacheHeader cache = mCacheController.getHeader(request.getRequestKey());
 				if (CommonUtil.isEmpty(cache)) {
 					// 不存在该缓存,需要进行网络请求
 					mNetworkQueue.add(request);
-					return;
+					continue;
 				}
 
 				if (cache.isExpired()) {
 					// 请求过期,需要重新进行网络请求刷新缓存数据
-					request.setCache(new CacheEntry(cache, null));
+					request.setRequestHeaders(cache.getResponseHeaders());
 					mNetworkQueue.add(request);
+					continue;
 				}
 
 				HttpResponse response = new HttpResponse(mCacheController.getData(cache.getKey()),
-						cache.getResponseheaders(), null, 304, false);
+						cache.getResponseHeaders(), cache.getParsedEncoding(), 304, false);
 				response.setSuccess(true);
 
 				if (HttpConfig.sDelayCache) {
@@ -74,6 +80,7 @@ public class CacheDispatcher extends Dispatcher {
 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				mDelivery.postError(request, new SGHttpException(e));
 			}
 		}
 	}
