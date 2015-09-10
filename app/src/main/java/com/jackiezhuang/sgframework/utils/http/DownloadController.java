@@ -1,5 +1,9 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
+import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
+import com.jackiezhuang.sgframework.utils.http.bean.DownloadRequest;
+
 /**
  * Created by JackieZhuang on 2015/9/5.
  */
@@ -7,18 +11,26 @@ public class DownloadController {
 
 	/**
 	 * <p>下载状态指示：</p>
-	 * READY：准备下载；DOWNLOADING：下载中；PAUSE：暂停下载；FINISHED：下载完成；DISCARD：取消下载
+	 * READY：准备下载；DOWNLOADING：下载中；PAUSE：暂停下载；FINISHED：下载完成；DISCARD：取消下载或者文件被删除
 	 */
 	public enum DownloadStatus{
 		READY, DOWNLOADING, PAUSE, FINISHED, DISCARD
 	}
 
-	public DownloadStatus mStatus;
+	private DownloadRequest mRequest;
+	private DownloadDBUtil mDBUtil;
+	private DownloadInfo mInfo;
+
+	public DownloadController(DownloadDBUtil downloadDBUtil, DownloadInfo downloadInfo) {
+		mDBUtil = downloadDBUtil;
+		mInfo = downloadInfo;
+	}
 
 	public void pause() {
-		if (mStatus == DownloadStatus.DOWNLOADING || mStatus == DownloadStatus.READY) {
-			mStatus = DownloadStatus.PAUSE;
+		if (mInfo.getStatus() == DownloadStatus.DOWNLOADING || mInfo.getStatus() == DownloadStatus.READY) {
+			mInfo.setStatus(DownloadStatus.PAUSE.ordinal());
 			// 写入当前完成到数据库
+			mDBUtil.update(mInfo);
 		}
 	}
 
@@ -26,18 +38,19 @@ public class DownloadController {
 	 * 下载前的初始化工作
 	 */
 	public void init() {
-		// 写入下载信息到数据库
-		// do something here
-
-		mStatus = DownloadStatus.READY;
+		if (CommonUtil.isEmpty(mDBUtil.select(mInfo.getKey()))) {
+			// 数据库不存在该记录，写入下载信息到数据库
+			mInfo.setStatus(DownloadStatus.READY.ordinal());
+			mDBUtil.insert(mInfo);
+		}
 	}
 
 	public void resume() {
-		if (mStatus == DownloadStatus.PAUSE) {
+		if (mInfo.getStatus() == DownloadStatus.PAUSE) {
 			// 读取此前中断内容
-			mStatus = DownloadStatus.READY;
+			mInfo.setStatus(DownloadStatus.READY.ordinal());
 		}
-		if (mStatus == DownloadStatus.DISCARD) {
+		if (mInfo.getStatus() == DownloadStatus.DISCARD) {
 			// 重新开始下载
 		}
 	}
@@ -46,16 +59,16 @@ public class DownloadController {
 	 * 指示下载
 	 */
 	public void start() {
-		if (mStatus == DownloadStatus.READY) {
-			mStatus = DownloadStatus.DOWNLOADING;
+		if (mInfo.getStatus() == DownloadStatus.READY) {
+			mInfo.setStatus(DownloadStatus.DOWNLOADING.ordinal());
 			// do http work
 		}
 	}
 
 	public void finished() {
-		if (mStatus == DownloadStatus.DOWNLOADING) {
-			// 移除数据库下载信息
-			mStatus = DownloadStatus.FINISHED;
+		if (mInfo.getStatus() == DownloadStatus.DOWNLOADING) {
+			// 更新数据库下载信息
+			mInfo.setStatus(DownloadStatus.FINISHED.ordinal());
 		}
 	}
 }

@@ -52,7 +52,6 @@ public final class HttpConfig {
 	/** 自定义缓存控制的缓存有效时间，单位：分钟。受限于{@link #sUseSeverControl} */
 	public static long sCacheTime = 10;
 
-
 	private HttpConfig(){};
 
 }
