@@ -36,7 +36,7 @@ dependencies {
 
 // 清除上次编译过的jar包
 task clearJar(type: Delete) {
-	delete 'libs/SgFrameUtils.jar'
+	delete 'build/libs/SgFrameUtils.jar'
 }
 
 task copy(type: Copy){}
@@ -99,6 +99,9 @@ uploadArchives {
 				packaging 'jar'
 			}
 			*/
+			pom.project {z
+
+			}
 			// 使用过滤防止上传其他类型包
 			addFilter('SgFrameUtils') {
                 artifact, file -> artifact.name == 'SgFrameUtils'

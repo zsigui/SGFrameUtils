@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,20 +53,6 @@ public class DownloadDBUtil {
 				info.getKey()});
 	}
 
-	/**
-	 * 更新下载状态为完成或者是废弃
-	 */
-	public void updateToFinishOrDicard(String key, int curSize, int status) {
-		String sql = "UPDATE " + DownloadInfo.Param.TABLE_NAME + " SET "
-				+ DownloadInfo.Param._START_POS + "=0, "
-				+ DownloadInfo.Param._STOP_POS + "=?, "
-				+ DownloadInfo.Param._CURRENT_SIZE + "=?, "
-				+ DownloadInfo.Param._STATE + "=? WHERE "
-				+ DownloadInfo.Param._KEY + "=?;";
-		SQLiteDatabase database = mHelper.getWritableDatabase();
-		database.execSQL(sql, new Object[]{curSize, curSize, status, key});
-	}
-
 	public DownloadInfo select(String key) {
 		String sql = "SELECT " + DownloadInfo.Param._KEY + ", "
 				+ DownloadInfo.Param._URL + ", "
@@ -93,7 +81,42 @@ public class DownloadDBUtil {
 		return info;
 	}
 
-	public Map<String, DownloadInfo> selectAll() {
+	public List<DownloadInfo> select(int status) {
+		String sql = "SELECT " + DownloadInfo.Param._KEY + ", "
+				+ DownloadInfo.Param._URL + ", "
+				+ DownloadInfo.Param._START_POS + ", "
+				+ DownloadInfo.Param._STOP_POS + ", "
+				+ DownloadInfo.Param._STORE_PATH + ", "
+				+ DownloadInfo.Param._CURRENT_SIZE + ", "
+				+ DownloadInfo.Param._STATE + " FROM "
+				+ DownloadInfo.Param.TABLE_NAME + " WHERE "
+				+ DownloadInfo.Param._STATE + "=?;";
+		return getInfoList(sql, new String[]{String.valueOf(status)});
+	}
+
+	private List<DownloadInfo> getInfoList(String sql, String[] args) {
+		SQLiteDatabase database = mHelper.getReadableDatabase();
+		Cursor c = database.rawQuery(sql, args);
+		List<DownloadInfo> result = new ArrayList<>();
+		if (c.isBeforeFirst()) {
+			while (c.moveToNext()) {
+				DownloadInfo info = new DownloadInfo();
+				info.setKey(c.getString(0));
+				info.setUrl(c.getString(1));
+				info.setStartPos(c.getInt(2));
+				info.setStopPos(c.getInt(3));
+				info.setStorePath(c.getString(4));
+				info.setCurSize(c.getInt(5));
+				info.setStatus(c.getInt(6));
+				result.add(info);
+			}
+		}
+		c.close();
+		database.close();
+		return result;
+	}
+
+	public List<DownloadInfo> selectAll() {
 		String sql = "SELECT " + DownloadInfo.Param._KEY + ", "
 				+ DownloadInfo.Param._URL + ", "
 				+ DownloadInfo.Param._START_POS + ", "
@@ -102,8 +125,12 @@ public class DownloadDBUtil {
 				+ DownloadInfo.Param._CURRENT_SIZE + ", "
 				+ DownloadInfo.Param._STATE + " FROM "
 				+ DownloadInfo.Param.TABLE_NAME;
+		return getInfoList(sql, null);
+	}
+
+	private Map<String, DownloadInfo> getInfoMap(String sql, String[] args) {
 		SQLiteDatabase database = mHelper.getReadableDatabase();
-		Cursor c = database.rawQuery(sql, null);
+		Cursor c = database.rawQuery(sql, args);
 		Map<String, DownloadInfo> result = new HashMap<>();
 		if (c.isBeforeFirst()) {
 			while (c.moveToNext()) {
@@ -127,6 +154,13 @@ public class DownloadDBUtil {
 		String sql = "DELETE FROM " + DownloadInfo.Param.TABLE_NAME + " WHERE " + DownloadInfo.Param._KEY + "=?;";
 		SQLiteDatabase database = mHelper.getWritableDatabase();
 		database.execSQL(sql, new Object[]{key});
+		database.close();
+	}
+
+	public void deleteAll() {
+		String sql = "DELETE FROM " + DownloadInfo.Param.TABLE_NAME + " WHERE 1";
+		SQLiteDatabase database = mHelper.getWritableDatabase();
+		database.execSQL(sql, null);
 		database.close();
 	}
 

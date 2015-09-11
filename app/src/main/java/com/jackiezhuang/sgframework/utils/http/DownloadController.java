@@ -1,13 +1,17 @@
 package com.jackiezhuang.sgframework.utils.http;
 
+import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
 import com.jackiezhuang.sgframework.utils.http.bean.DownloadRequest;
+import com.jackiezhuang.sgframework.utils.http.itfc.IDownloadCallback;
 
 /**
  * Created by JackieZhuang on 2015/9/5.
  */
 public class DownloadController {
+
+	private static final String TAG = DownloadController.class.getName();
 
 	/**
 	 * <p>下载状态指示：</p>
@@ -20,6 +24,7 @@ public class DownloadController {
 	private DownloadRequest mRequest;
 	private DownloadDBUtil mDBUtil;
 	private DownloadInfo mInfo;
+	private IDownloadCallback mCallback;
 
 	public DownloadController(DownloadDBUtil downloadDBUtil, DownloadInfo downloadInfo) {
 		mDBUtil = downloadDBUtil;
@@ -66,9 +71,21 @@ public class DownloadController {
 	}
 
 	public void finished() {
-		if (mInfo.getStatus() == DownloadStatus.DOWNLOADING) {
+		if (mInfo.getStatus() == DownloadStatus.DOWNLOADING &&
+				mInfo.getStopPos() == mInfo.getCurSize()) {
 			// 更新数据库下载信息
 			mInfo.setStatus(DownloadStatus.FINISHED.ordinal());
+			mDBUtil.update(mInfo);
+			mCallback.finished(mInfo);
+		} else {
+			// 文件出错，废弃下载
+			L.i(TAG, "finished() : the file download meet with error!");
+			mInfo.setStatus(DownloadStatus.DISCARD.ordinal());
+			mInfo.setStopPos(0);
+			mInfo.setStartPos(0);
+			mInfo.setCurSize(0);
+			mDBUtil.update(mInfo);
+			mCallback.fail(mInfo);
 		}
 	}
 }

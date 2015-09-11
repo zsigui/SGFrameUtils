@@ -81,6 +81,16 @@ public class DownloadInfo {
 		}
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		return (o instanceof DownloadInfo) && ((DownloadInfo) o).getKey().equals(this.mKey);
+	}
+
+	@Override
+	public int hashCode() {
+		return mKey.hashCode();
+	}
+
 	/**
 	 * 定义数据库参数名
 	 */
