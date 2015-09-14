@@ -8,20 +8,24 @@ import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
 import com.jackiezhuang.sgframework.utils.http.bean.DownloadRequest;
 import com.jackiezhuang.sgframework.utils.http.itfc.IDownloadCallback;
 
+import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * Created by JackieZhuang on 2015/9/10.
  */
-public class DownloadManager {
+public enum  DownloadManager {
+
+	INSTANCE;
 
 	private static final String TAG = DownloadManager.class.getName();
 	private static final int mMaxThreadCount = 3;
+	private int mCurThreadCount;
 	private DownloadDBUtil mDBUtil;
 	private boolean mIsInit;
 	private IDownloadCallback mCallback;
-	private PriorityBlockingQueue<DownloadInfo> mDownloadingQueue;
-	private int mCurThreadCount = 1;
+	private PriorityBlockingQueue<DownloadInfo> mDownloadQueue;
+	private List<DownloadInfo> mReadyQueue;
 	private Thread[] mNetWorker;
 
 	public IDownloadCallback getCallback() {
@@ -54,8 +58,20 @@ public class DownloadManager {
 		if (!mIsInit) {
 			throw new RuntimeException("start() : you need to call init(Context) first");
 		}
-		mNetWorker = new Thread[4];
+		mNetWorker = new Thread[mMaxThreadCount];
+		mDownloadQueue = new PriorityBlockingQueue<>(mMaxThreadCount);
+		mDownloadQueue.addAll(mDBUtil.select(DownloadController.DownloadStatus.DOWNLOADING.ordinal()));
+		mReadyQueue = mDBUtil.select(DownloadController.DownloadStatus.READY.ordinal());
+		mCurThreadCount = 0;
+		wakeToWork();
+	}
 
+
+	/**
+	 * 当线程有空闲，添加新的到正在运行中
+	 */
+	public synchronized void wakeToWork() {
+		mDownloadQueue.add(mReadyQueue.remove(0));
 	}
 
 	private void discard(String key) {
@@ -67,16 +83,11 @@ public class DownloadManager {
 		if (info.getStatus() == DownloadController.DownloadStatus.DOWNLOADING) {
 
 		}
-		mDownloadingQueue.remove(info);
 		mDBUtil.delete(key);
 	}
 
 	private DownloadInfo obtainByKey(String key) {
-		for (DownloadInfo info : mDownloadingQueue) {
-			if (key.equals(info.getKey())) {
-				return info;
-			}
-		}
+
 		return null;
 	}
 
@@ -86,10 +97,18 @@ public class DownloadManager {
 
 	public void remove(DownloadInfo info) {
 		mDBUtil.delete(info.getKey());
-		mDownloadingQueue.remove(info);
 		if (mCallback != null) {
 			mCallback.remove(info);
 		}
 	}
 
+	public void onDownloadProgress(DownloadInfo info) {
+
+	}
+
+	public void onDownloadFail(DownloadInfo downloadInfo, String errMsg) {
+	}
+
+	public void onDownloadSuccess(DownloadInfo downloadInfo) {
+	}
 }

@@ -94,6 +94,19 @@ public class DownloadDBUtil {
 		return getInfoList(sql, new String[]{String.valueOf(status)});
 	}
 
+	public List<DownloadInfo> select(String where, String[] whereArgs) {
+		String sql = "SELECT " + DownloadInfo.Param._KEY + ", "
+				+ DownloadInfo.Param._URL + ", "
+				+ DownloadInfo.Param._START_POS + ", "
+				+ DownloadInfo.Param._STOP_POS + ", "
+				+ DownloadInfo.Param._STORE_PATH + ", "
+				+ DownloadInfo.Param._CURRENT_SIZE + ", "
+				+ DownloadInfo.Param._STATE + " FROM "
+				+ DownloadInfo.Param.TABLE_NAME + " WHERE "
+				+ where;
+		return getInfoList(sql, whereArgs);
+	}
+
 	private List<DownloadInfo> getInfoList(String sql, String[] args) {
 		SQLiteDatabase database = mHelper.getReadableDatabase();
 		Cursor c = database.rawQuery(sql, args);

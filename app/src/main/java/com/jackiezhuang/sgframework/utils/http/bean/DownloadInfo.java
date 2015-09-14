@@ -2,6 +2,9 @@ package com.jackiezhuang.sgframework.utils.http.bean;
 
 import android.provider.BaseColumns;
 
+import com.jackiezhuang.sgframework.utils.SGConfig;
+import com.jackiezhuang.sgframework.utils.chiper.MD5;
+import com.jackiezhuang.sgframework.utils.common.CommonUtil;
 import com.jackiezhuang.sgframework.utils.http.DownloadController;
 
 /**
@@ -21,6 +24,9 @@ public class DownloadInfo {
 	}
 
 	public String getKey() {
+		if (CommonUtil.isEmpty(mKey)) {
+			mKey = MD5.digestInHex(mUrl, SGConfig.DEFAULT_SYS_CHARSET);
+		}
 		return mKey;
 	}
 
@@ -73,12 +79,7 @@ public class DownloadInfo {
 	}
 
 	public void setStatus(int status) {
-		for (DownloadController.DownloadStatus downStatus : DownloadController.DownloadStatus.values()) {
-			if (downStatus.ordinal() == status) {
-				mStatus = downStatus;
-				return;
-			}
-		}
+		mStatus = DownloadController.DownloadStatus.values()[status];
 	}
 
 	@Override
