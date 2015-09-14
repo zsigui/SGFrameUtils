@@ -106,6 +106,10 @@ public enum  DownloadManager {
 
 	}
 
+	public void onDownloadStart(DownloadInfo info){
+
+	}
+
 	public void onDownloadFail(DownloadInfo downloadInfo, String errMsg) {
 	}
 

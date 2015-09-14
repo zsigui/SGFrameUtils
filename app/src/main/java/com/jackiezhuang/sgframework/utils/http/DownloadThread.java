@@ -30,6 +30,7 @@ public class DownloadThread extends Dispatcher {
 		while (!mQuit) {
 			try {
 				DownloadInfo downloadInfo = mDownloadInfos.take();
+				DownloadManager.INSTANCE.onDownloadStart(downloadInfo);
 				if (downloadInfo.getStatus() == DownloadController.DownloadStatus.DOWNLOADING
 						&& initRange(downloadInfo)) {
 					URL url = new URL(downloadInfo.getUrl());
