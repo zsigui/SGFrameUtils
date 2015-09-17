@@ -10,6 +10,7 @@ import com.jackiezhuang.sgframework.utils.http.bean.HttpRequest;
 import com.jackiezhuang.sgframework.utils.http.bean.NetworkResponse;
 import com.jackiezhuang.sgframework.utils.http.itfc.IHttpWorker;
 import com.jackiezhuang.sgframework.utils.io.IOUtil;
+import com.jackiezhuang.sgframework.utils.system.SystemTool;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,9 @@ public class HttpConnectionWorker implements IHttpWorker {
 	}
 
 	public HttpConnectionWorker(SSLSocketFactory sslSocketFactory) {
+		if (SystemTool.getSDKVersion() < 13) {
+			System.setProperty("http.keepAlive", "false");
+		}
 		try {
 			// 设置默认自定义Https的认证方式
 			TrustManager[] tm = {new SGDefaultX509TrustManager()};

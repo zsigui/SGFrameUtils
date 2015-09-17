@@ -1,11 +1,10 @@
-package com.jackiezhuang.sgframework.utils.http.bean;
+package com.jackiezhuang.sgframework.utils.http.download;
 
 import android.provider.BaseColumns;
 
 import com.jackiezhuang.sgframework.utils.SGConfig;
 import com.jackiezhuang.sgframework.utils.chiper.MD5;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
-import com.jackiezhuang.sgframework.utils.http.DownloadController;
 
 /**
  * Created by zsigui on 15-9-10.
@@ -18,7 +17,7 @@ public class DownloadInfo {
 	private int mStartPos;
 	private int mStopPos;
 	private int mCurSize;
-	private DownloadController.DownloadStatus mStatus;
+	private DownloadStatus mStatus;
 
 	public DownloadInfo() {
 	}
@@ -74,22 +73,22 @@ public class DownloadInfo {
 		mCurSize = curSize;
 	}
 
-	public DownloadController.DownloadStatus getStatus() {
+	public DownloadStatus getStatus() {
 		return mStatus;
 	}
 
 	public void setStatus(int status) {
-		mStatus = DownloadController.DownloadStatus.values()[status];
+		mStatus = DownloadStatus.values()[status];
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return (o instanceof DownloadInfo) && ((DownloadInfo) o).getKey().equals(this.mKey);
+		return (o instanceof DownloadInfo) && ((DownloadInfo) o).getKey().equals(this.getKey());
 	}
 
 	@Override
 	public int hashCode() {
-		return mKey.hashCode();
+		return getKey().hashCode();
 	}
 
 	/**

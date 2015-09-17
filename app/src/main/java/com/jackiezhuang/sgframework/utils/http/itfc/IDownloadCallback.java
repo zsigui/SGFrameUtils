@@ -1,6 +1,6 @@
 package com.jackiezhuang.sgframework.utils.http.itfc;
 
-import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
+import com.jackiezhuang.sgframework.utils.http.download.DownloadInfo;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public interface IDownloadCallback {
 
 	void remove(DownloadInfo key);
 
-	void finished(DownloadInfo info);
+	void finished(DownloadInfo info, int errCode);
 
 	void fail(DownloadInfo info);
 }

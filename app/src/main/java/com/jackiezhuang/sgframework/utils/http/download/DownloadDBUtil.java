@@ -1,11 +1,9 @@
-package com.jackiezhuang.sgframework.utils.http;
+package com.jackiezhuang.sgframework.utils.http.download;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;

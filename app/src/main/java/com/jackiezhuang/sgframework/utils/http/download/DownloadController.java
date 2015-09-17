@@ -1,8 +1,7 @@
-package com.jackiezhuang.sgframework.utils.http;
+package com.jackiezhuang.sgframework.utils.http.download;
 
 import com.jackiezhuang.sgframework.utils.L;
 import com.jackiezhuang.sgframework.utils.common.CommonUtil;
-import com.jackiezhuang.sgframework.utils.http.bean.DownloadInfo;
 import com.jackiezhuang.sgframework.utils.http.bean.DownloadRequest;
 import com.jackiezhuang.sgframework.utils.http.itfc.IDownloadCallback;
 
@@ -17,9 +16,7 @@ public class DownloadController {
 	 * <p>下载状态指示：</p>
 	 * READY：准备下载；DOWNLOADING：下载中；PAUSE：暂停下载；FINISHED：下载完成；DISCARD：取消下载或者文件被删除
 	 */
-	public enum DownloadStatus{
-		READY, DOWNLOADING, PAUSE, FINISHED, DISCARD
-	}
+
 
 	private DownloadRequest mRequest;
 	private DownloadDBUtil mDBUtil;
