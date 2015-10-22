@@ -1,0 +1,113 @@
+@startuml
+
+title 打包后台流程图
+
+'autonumber
+
+actor 用户
+
+用户 -> 登录页面 : 打开网站，进入登录页面
+
+activate 登录页面
+
+	登录页面-> 登录页面 : 初始操作
+    		note right of 登录页面 #00BFFF
+    			1. 判断cookie是否存在
+    			2. 判断并自动填充账号密码
+    		end note
+
+	alt 登录页面验证
+		登录页面 -> 主页面 : 验证通过
+		note right of 登录页面
+			账号、密码与数据库查询一致
+		end note
+	else 验证不通过
+		登录页面 -> 登录页面 : 提示错误
+		note right of 登录页面 #ff0000
+			1. 账号或密码为空
+			2. 验证码错误
+			3. 账号不存在或密码错误
+		end note
+	end
+
+deactivate 登录页面
+
+activate 主页面
+	alt 初始会话状态验证
+		主页面 -> 主页面 : Session 验证
+		note right of 主页面 #00BFFF
+			1. 判断 Session 是否存在 (pa_user, pa_key : 随机码, pa_time : 过期时间)
+			2. 判断 pa_time 是否已经过期
+		end note
+	else Session 验证不通过
+		主页面 -> 登录页面
+		note left of 主页面 #ff0000
+			1. 未登录
+			2. 会话超时
+		end note
+	end
+
+	主页面 -> SDK接入页面 : 直接跳转
+	activate SDK接入页面
+    	alt 新建SDK操作
+    		SDK接入页面 -> SDK接入页面 : 新建SDK
+    		note right of SDK接入页面 #00BFFF
+    			1. 用户输入参数(sdk_name, sdk_id, sub_channel_id, short_name, config_key,
+    			    need_script, script_key, need_xml_parser)
+    			2. 判断 sdk_id 和 sdk_name 是否已经存在
+    			3. 不存在：写入数据库； 存在：提示已存在
+    		end note
+    	end
+    deactivate SDK接入页面
+    SDK接入页面 -> 主页面 : 直接跳转
+
+	主页面 -> 游戏接入页面 : 直接跳转
+	activate 游戏接入页面
+    	alt 新建游戏操作
+    		游戏接入页面 -> 游戏接入页面 : 新建游戏
+    		note right of 游戏接入页面 #00BFFF
+    			1. 用户输入参数 (game_name)
+    			2. 验证输入是否已经存在
+    			3. 不存在：写入数据库，创建游戏文件夹； 存在：提示已存在
+    		end note
+
+    		游戏接入页面 -> 游戏接入页面 : 关联游戏和SDK
+            note right of 游戏接入页面 #00BFFF
+                1. 用户选择游戏，可接入SDK
+                2. 填写对应的配置参数 (package_name, config_map : 由config_key生成,
+                 script_map : 由 script_key 生成, xml_parser)
+                3. 不存在：写入数据库，创建游戏文件夹； 存在：提示已存在
+            end note
+    	end
+    deactivate 游戏接入页面
+    游戏接入页面 -> 主页面 : 直接跳转
+
+	主页面 -> APK上传页面 : 直接跳转
+	activate APK上传页面
+    	alt APK上传操作
+    		APK上传页面 -> APK上传页面 : 上传APK
+    		note right of APK上传页面 #00BFFF
+				1. 用户选择APK上传
+				2. 判断APK是否存在，文件名是否符合格式
+				3. 不存在：保存硬盘； 存在：提示已存在
+    		end note
+    	end
+    deactivate APK上传页面
+    APK上传页面 -> 主页面 : 直接跳转
+
+	主页面 -> 打包操作页面 : 直接跳转
+	activate 打包操作页面
+    	alt 配置打包操作
+    		打包操作页面 -> 打包操作页面 : 配置打包
+    		note right of 打包操作页面 #00BFFF
+                1. 选择要打包的APK，游戏，对应SDK
+                2. 读取配置，执行打包操作
+                3. 打包完成：跳转下载包列表页面； 打包失败：提示原因
+    		end note
+    	end
+    deactivate 打包操作页面
+    打包操作页面 -> 主页面 : 直接跳转
+
+deactivate 主页面
+
+@enduml
